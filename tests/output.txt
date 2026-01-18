@@ -1,0 +1,12 @@
+--- AetherLink Flight Software Simulation ---
+Generating Telemetry Packet ID: 1
+Sequence Number: 300
+Serializing...
+Transmitting  11 bytes.
+Receiving...
+Packet Received Successfully!
+ID:  1
+Sequence:  300
+Payload: Hello
+VERIFICATION PASSED: Data integrity confirmed.
+--- End Simulation ---
