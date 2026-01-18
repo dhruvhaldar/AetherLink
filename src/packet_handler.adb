@@ -1,7 +1,11 @@
+with CRC16;
+
 package body Packet_Handler with SPARK_Mode is
 
    procedure Serialize (P : in Packet; Buffer : out Byte_Array; Last : out Natural) is
       Index : Natural := Buffer'First;
+      CRC   : Unsigned_16;
+      Start : constant Natural := Buffer'First;
    begin
       --  Header: ID (1 byte)
       Buffer(Index) := P.ID;
@@ -22,11 +26,15 @@ package body Packet_Handler with SPARK_Mode is
          Index := Index + 1;
       end loop;
       
+      --  Compute Checksum over the data written so far
+      --  (ID, Sequence, Length, Payload)
+      CRC := CRC16.Compute (CRC16.Byte_Array (Buffer (Start .. Index - 1)));
+
       --  Checksum (2 bytes, Big Endian)
-      Buffer(Index) := Unsigned_8 (Shift_Right (P.Checksum, 8));
+      Buffer(Index) := Unsigned_8 (Shift_Right (CRC, 8));
       Index := Index + 1;
       
-      Buffer(Index) := Unsigned_8 (P.Checksum and 16#FF#);
+      Buffer(Index) := Unsigned_8 (CRC and 16#FF#);
       Index := Index + 1;
       
       Last := Index - 1; -- Last points to the last written index
@@ -35,6 +43,8 @@ package body Packet_Handler with SPARK_Mode is
    procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Success : out Boolean) is
       Index : Natural := Buffer'First;
       Computed_Len : Unsigned_8;
+      Received_Checksum : Unsigned_16;
+      Calculated_Checksum : Unsigned_16;
    begin
       Success := False;
       
@@ -66,10 +76,19 @@ package body Packet_Handler with SPARK_Mode is
          Index := Index + 1;
       end loop;
       
-      --  Checksum
-      P.Checksum := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
+      --  Calculate Checksum over the data part (start to end of payload)
+      --  The data is from Buffer'First to Index - 1
+      Calculated_Checksum := CRC16.Compute (CRC16.Byte_Array (Buffer (Buffer'First .. Index - 1)));
       
-      Success := True;
+      --  Read Checksum from Buffer
+      Received_Checksum := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
+      P.Checksum := Received_Checksum;
+
+      if Calculated_Checksum = Received_Checksum then
+         Success := True;
+      else
+         Success := False;
+      end if;
    end Deserialize;
 
 end Packet_Handler;

@@ -1,12 +1,17 @@
 --- AetherLink Flight Software Simulation ---
+--- Sentinel Security Verification ---
+Test 1: Valid Packet Transmission
 Generating Telemetry Packet ID: 1
-Sequence Number: 300
-Serializing...
-Transmitting  11 bytes.
-Receiving...
-Packet Received Successfully!
-ID:  1
-Sequence:  300
-Payload: Hello
-VERIFICATION PASSED: Data integrity confirmed.
+Serialized  11 bytes.
+Packet Received Successfully.
+PASS: Data matches transmitted data.
+Computed Checksum:  200
+
+Test 2: Corrupted Packet (Data Tampering)
+Injecting fault: Modifying payload byte...
+PASS: Packet rejected as expected (Checksum mismatch).
+
+Test 3: Corrupted Checksum
+Injecting fault: Modifying checksum byte...
+PASS: Packet rejected as expected (Checksum mismatch).
 --- End Simulation ---
