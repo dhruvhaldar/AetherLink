@@ -1,0 +1,7 @@
+obj/
+*.ali
+*.o
+*.bexch
+*.d
+main
+benchmark
