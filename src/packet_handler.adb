@@ -17,11 +17,12 @@ package body Packet_Handler with SPARK_Mode is
       Index := Index + 1;
       
       --  Payload
-      for I in 1 .. P.Length loop
-         Buffer(Index) := P.Payload(I);
-         Index := Index + 1;
-      end loop;
-      
+      if P.Length > 0 then
+         Buffer (Index .. Index + Natural (P.Length) - 1) :=
+           Byte_Array (P.Payload (1 .. P.Length));
+         Index := Index + Natural (P.Length);
+      end if;
+
       --  Checksum (2 bytes, Big Endian)
       Buffer(Index) := Unsigned_8 (Shift_Right (P.Checksum, 8));
       Index := Index + 1;
@@ -65,7 +66,7 @@ package body Packet_Handler with SPARK_Mode is
          P.Payload(I) := Buffer(Index);
          Index := Index + 1;
       end loop;
-      
+
       --  Checksum
       P.Checksum := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
       
