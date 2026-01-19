@@ -1,0 +1,19 @@
+
+[1m[36m============================================[0m
+[1m[36m   AetherLink Flight Software Simulation    [0m
+[1m[36m============================================[0m
+
+[36m[INFO]  [0mGenerating Telemetry Packet...
+        ID:        1
+        Sequence:  300
+[36m[INFO]  [0mTransmitting  11 bytes.
+        01 01 2C 05 48 65 6C 6C 6F 30 39
+
+[36m[INFO]  [0mReceiving packet from buffer...
+[32m[OK]    [0mPacket deserialized successfully.
+        ID:        1
+        Sequence:  300
+        Payload:  Hello
+[32m[OK]    [0mData integrity verified (Checksum match).
+
+[1m[36m============================================[0m

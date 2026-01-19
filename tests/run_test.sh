@@ -8,7 +8,7 @@ gprbuild -P aetherlink.gpr
 ./obj/main > tests/output.txt
 
 # Verify Output
-if grep -q "VERIFICATION PASSED" tests/output.txt; then
+if grep -q "Data integrity verified" tests/output.txt; then
     echo "Test Passed!"
     cat tests/output.txt
     exit 0

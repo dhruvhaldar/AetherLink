@@ -33,14 +33,17 @@ package body Packet_Handler with SPARK_Mode is
       Last := Index - 1; -- Last points to the last written index
    end Serialize;
 
-   procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Success : out Boolean) is
+   procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Status : out Deserialize_Status) is
       Index : Natural := Buffer'First;
       Computed_Len : Unsigned_8;
    begin
-      Success := False;
+      --  Initialize output to avoid uninitialized usage if we return early (SPARK/Ada safety)
+      --  Default to an error state until proven successful.
+      Status := Buffer_Too_Short;
       
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
+         Status := Buffer_Too_Short;
          return;
       end if;
       
@@ -59,6 +62,7 @@ package body Packet_Handler with SPARK_Mode is
       --  Current Index points to start of Payload.
       --  We need P.Length bytes for payload + 2 bytes for checksum.
       if Index + Natural(P.Length) + 2 > Buffer'Last + 1 then
+         Status := Malformed_Payload_Length;
          return;
       end if;
       
@@ -70,7 +74,7 @@ package body Packet_Handler with SPARK_Mode is
       --  Checksum
       P.Checksum := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
       
-      Success := True;
+      Status := Success;
    end Deserialize;
 
 end Packet_Handler;
