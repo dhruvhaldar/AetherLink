@@ -70,7 +70,9 @@ package body Packet_Handler with SPARK_Mode is
       --  Check if buffer has enough data for payload + checksum
       --  Current Index points to start of Payload.
       --  We need P.Length bytes for payload + 2 bytes for checksum.
-      if Index + Natural(P.Length) + 2 > Buffer'Last + 1 then
+      --  Security Note: We use subtraction to avoid overflow on Buffer'Last + 1
+      --  (which could happen if Buffer'Last is Positive'Last).
+      if Buffer'Last - Index + 1 < Natural(P.Length) + 2 then
          return;
       end if;
       
