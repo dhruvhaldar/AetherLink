@@ -83,8 +83,10 @@ begin
       end;
       
       if Rx_Packet.ID = Tx_Packet.ID and then 
-         Rx_Packet.Sequence = Tx_Packet.Sequence and then
-         Rx_Packet.Checksum = Tx_Packet.Checksum then
+         Rx_Packet.Sequence = Tx_Packet.Sequence then
+         -- Note: We do not compare Checksums here because Tx_Packet.Checksum is manual/dummy,
+         -- whereas Rx_Packet.Checksum is computed by Serialize.
+         -- The Deserialize function already verified the checksum validity.
          Put_Line (C_Green & "VERIFICATION PASSED: Data integrity confirmed." & C_Reset);
       else
          Put_Line (C_Red & "VERIFICATION FAILED: Data mismatch." & C_Reset);

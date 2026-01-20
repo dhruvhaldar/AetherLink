@@ -1,7 +1,10 @@
+with CRC16;
+
 package body Packet_Handler with SPARK_Mode is
 
    procedure Serialize (P : in Packet; Buffer : out Byte_Array; Last : out Natural) is
       Index : Natural := Buffer'First;
+      CRC   : Unsigned_16;
    begin
       --  Header: ID (1 byte)
       Buffer(Index) := P.ID;
@@ -23,11 +26,15 @@ package body Packet_Handler with SPARK_Mode is
          Index := Index + Natural (P.Length);
       end if;
 
+      --  Compute Checksum of Header + Payload
+      --  Buffer(Buffer'First .. Index - 1) contains the data to checksum
+      CRC := CRC16.Compute (CRC16.Byte_Array (Buffer (Buffer'First .. Index - 1)));
+
       --  Checksum (2 bytes, Big Endian)
-      Buffer(Index) := Unsigned_8 (Shift_Right (P.Checksum, 8));
+      Buffer(Index) := Unsigned_8 (Shift_Right (CRC, 8));
       Index := Index + 1;
       
-      Buffer(Index) := Unsigned_8 (P.Checksum and 16#FF#);
+      Buffer(Index) := Unsigned_8 (CRC and 16#FF#);
       Index := Index + 1;
       
       Last := Index - 1; -- Last points to the last written index
@@ -36,6 +43,9 @@ package body Packet_Handler with SPARK_Mode is
    procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Success : out Boolean) is
       Index : Natural := Buffer'First;
       Computed_Len : Unsigned_8;
+      Calculated_CRC : Unsigned_16;
+      Received_CRC   : Unsigned_16;
+      Payload_Start  : Natural;
    begin
       Success := False;
       
@@ -55,6 +65,8 @@ package body Packet_Handler with SPARK_Mode is
       P.Length := Computed_Len;
       Index := Index + 1;
       
+      Payload_Start := Index;
+
       --  Check if buffer has enough data for payload + checksum
       --  Current Index points to start of Payload.
       --  We need P.Length bytes for payload + 2 bytes for checksum.
@@ -67,10 +79,21 @@ package body Packet_Handler with SPARK_Mode is
          Index := Index + 1;
       end loop;
 
-      --  Checksum
-      P.Checksum := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
-      
-      Success := True;
+      --  Checksum Extraction
+      Received_CRC := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
+      P.Checksum   := Received_CRC;
+
+      --  Verify Checksum
+      --  Calculate CRC of the received bytes (Header + Payload)
+      --  This corresponds to Buffer(Buffer'First .. Payload_End)
+      --  Payload_End is Index - 1 (the last byte of payload)
+      Calculated_CRC := CRC16.Compute (CRC16.Byte_Array (Buffer (Buffer'First .. Index - 1)));
+
+      if Calculated_CRC = Received_CRC then
+         Success := True;
+      else
+         Success := False;
+      end if;
    end Deserialize;
 
 end Packet_Handler;
