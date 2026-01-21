@@ -38,29 +38,29 @@ package body CRC16 with SPARK_Mode is
 
    --  CRC-16-CCITT (Poly 0x1021)
    
-   function Compute_Byte (Current_CRC : Unsigned_16; Byte_Val : Unsigned_8) return Unsigned_16 is
+   function Update (Crc : Unsigned_16; Val : Unsigned_8) return Unsigned_16 is
       Index : Unsigned_8;
    begin
       --  Optimized table lookup:
       --  CRC = (CRC << 8) XOR Table((CRC >> 8) XOR Byte)
-      Index := Unsigned_8 (Shift_Right (Current_CRC, 8)) xor Byte_Val;
-      return Shift_Left (Current_CRC, 8) xor CRC_Table (Index);
-   end Compute_Byte;
+      Index := Unsigned_8 (Shift_Right (Crc, 8)) xor Val;
+      return Shift_Left (Crc, 8) xor CRC_Table (Index);
+   end Update;
 
    function Compute (Data : in String) return Unsigned_16 is
-      CRC : Unsigned_16 := 16#FFFF#; -- CCITT Initial Value
+      CRC : Unsigned_16 := Init_Val; -- CCITT Initial Value
    begin
       for I in Data'Range loop
-         CRC := Compute_Byte (CRC, Unsigned_8 (Character'Pos (Data (I))));
+         CRC := Update (CRC, Unsigned_8 (Character'Pos (Data (I))));
       end loop;
       return CRC;
    end Compute;
 
    function Compute (Data : in Byte_Array) return Unsigned_16 is
-      CRC : Unsigned_16 := 16#FFFF#; -- CCITT Initial Value
+      CRC : Unsigned_16 := Init_Val; -- CCITT Initial Value
    begin
       for I in Data'Range loop
-         CRC := Compute_Byte (CRC, Data (I));
+         CRC := Update (CRC, Data (I));
       end loop;
       return CRC;
    end Compute;
