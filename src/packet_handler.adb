@@ -45,7 +45,6 @@ package body Packet_Handler with SPARK_Mode is
       Computed_Len : Unsigned_8;
       Calculated_CRC : Unsigned_16;
       Received_CRC   : Unsigned_16;
-      Payload_Start  : Natural;
    begin
       Success := False;
       
@@ -65,12 +64,11 @@ package body Packet_Handler with SPARK_Mode is
       P.Length := Computed_Len;
       Index := Index + 1;
       
-      Payload_Start := Index;
-
       --  Check if buffer has enough data for payload + checksum
       --  Current Index points to start of Payload.
       --  We need P.Length bytes for payload + 2 bytes for checksum.
-      if Index + Natural(P.Length) + 2 > Buffer'Last + 1 then
+      --  We use subtraction to avoid overflow when Buffer is at the end of memory.
+      if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
          return;
       end if;
       
