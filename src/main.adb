@@ -24,12 +24,41 @@ procedure Main is
    end To_Hex;
 
    procedure Print_Hex_Dump (Data : Byte_Array; Length : Natural) is
+      Bytes_Per_Line : constant Natural := 16;
+      Offset         : Natural := 0;
+      B              : Unsigned_8;
+      C              : Character;
    begin
-      Put ("   [HEX] ");
-      for I in 1 .. Length loop
-         Put (To_Hex(Data(Data'First + I - 1)) & " ");
+      while Offset < Length loop
+         Put ("   [HEX] ");
+
+         --  Print Hex
+         for I in 1 .. Bytes_Per_Line loop
+            if Offset + I <= Length then
+               Put (To_Hex (Data (Data'First + Offset + I - 1)) & " ");
+            else
+               Put ("   "); -- Padding for incomplete lines
+            end if;
+         end loop;
+
+         Put (" | ");
+
+         --  Print ASCII
+         for I in 1 .. Bytes_Per_Line loop
+            if Offset + I <= Length then
+               B := Data (Data'First + Offset + I - 1);
+               if B >= 32 and B <= 126 then
+                  C := Character'Val (B);
+                  Put (C);
+               else
+                  Put ('.');
+               end if;
+            end if;
+         end loop;
+
+         New_Line;
+         Offset := Offset + Bytes_Per_Line;
       end loop;
-      New_Line;
    end Print_Hex_Dump;
 
 begin
