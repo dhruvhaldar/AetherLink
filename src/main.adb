@@ -23,6 +23,18 @@ procedure Main is
       return Hex_Digits(Natural(B / 16)) & Hex_Digits(Natural(B mod 16));
    end To_Hex;
 
+   function To_Hex_16 (N : Natural) return String is
+      Hex_Digits : constant array (0 .. 15) of Character := "0123456789ABCDEF";
+      V : Natural := N;
+      Result : String (1 .. 4);
+   begin
+      for I in reverse 1 .. 4 loop
+         Result(I) := Hex_Digits(V mod 16);
+         V := V / 16;
+      end loop;
+      return Result;
+   end To_Hex_16;
+
    procedure Print_Hex_Dump (Data : Byte_Array; Length : Natural) is
       Bytes_Per_Line : constant Natural := 16;
       Offset         : Natural := 0;
@@ -30,7 +42,7 @@ procedure Main is
       C              : Character;
    begin
       while Offset < Length loop
-         Put ("   [HEX] ");
+         Put ("   " & To_Hex_16(Offset) & " | ");
 
          --  Print Hex
          for I in 1 .. Bytes_Per_Line loop
@@ -63,7 +75,7 @@ procedure Main is
 
 begin
    New_Line;
-   Put_Line (C_Bold & C_Cyan & "=== AetherLink Flight Software Simulation ===" & C_Reset);
+   Put_Line (C_Bold & C_Cyan & "📡 === AetherLink Flight Software Simulation ===" & C_Reset);
    New_Line;
 
    --  Initialize a packet
@@ -87,17 +99,17 @@ begin
    Put_Line ("Serializing...");
    Serialize (Tx_Packet, Buffer, Last);
    
-   Put_Line ("Transmitting " & Natural'Image(Last) & " bytes.");
+   Put_Line ("📦 Transmitting " & Natural'Image(Last) & " bytes.");
    Print_Hex_Dump (Buffer, Last);
    New_Line;
    
    --  Simulate Transmission (Loopback)
    --  Deserialize
-   Put_Line ("Receiving...");
+   Put_Line ("📡 Receiving...");
    Deserialize (Buffer(1 .. Last), Rx_Packet, Success);
    
    if Success then
-      Put_Line (C_Green & "Packet Received Successfully!" & C_Reset);
+      Put_Line (C_Green & "✅ Packet Received Successfully!" & C_Reset);
       Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
       Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       
@@ -116,14 +128,14 @@ begin
          -- Note: We do not compare Checksums here because Tx_Packet.Checksum is manual/dummy,
          -- whereas Rx_Packet.Checksum is computed by Serialize.
          -- The Deserialize function already verified the checksum validity.
-         Put_Line (C_Green & "VERIFICATION PASSED: Data integrity confirmed." & C_Reset);
+         Put_Line (C_Green & "✅ VERIFICATION PASSED: Data integrity confirmed." & C_Reset);
       else
-         Put_Line (C_Red & "VERIFICATION FAILED: Data mismatch." & C_Reset);
+         Put_Line (C_Red & "❌ VERIFICATION FAILED: Data mismatch." & C_Reset);
          Put_Line ("   Expected Sequence:" & Sequence_Number_Type'Image(Tx_Packet.Sequence));
          Put_Line ("   Got Sequence:     " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       end if;
    else
-      Put_Line (C_Red & "Packet Reception Failed." & C_Reset);
+      Put_Line (C_Red & "❌ Packet Reception Failed." & C_Reset);
    end if;
    
    New_Line;
