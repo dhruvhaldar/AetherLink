@@ -65,4 +65,13 @@ package body CRC16 with SPARK_Mode is
       return CRC;
    end Compute;
 
+   function Update (Crc : Unsigned_16; Data : Byte_Array) return Unsigned_16 is
+      Result : Unsigned_16 := Crc;
+   begin
+      for I in Data'Range loop
+         Result := Update (Result, Data (I));
+      end loop;
+      return Result;
+   end Update;
+
 end CRC16;
