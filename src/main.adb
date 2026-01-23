@@ -106,7 +106,7 @@ begin
          Msg : String (1 .. Natural(Rx_Packet.Length));
       begin
          for I in 1 .. Rx_Packet.Length loop
-            Msg(Natural(I)) := Character'Val(Rx_Packet.Payload(I));
+            Msg(Natural(I)) := Character'Val(Rx_Packet.Payload(Positive(I)));
          end loop;
          Put_Line ("   Payload:  " & Msg);
       end;

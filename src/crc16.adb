@@ -56,13 +56,40 @@ package body CRC16 with SPARK_Mode is
       return CRC;
    end Compute;
 
-   function Compute (Data : in Byte_Array) return Unsigned_16 is
-      CRC : Unsigned_16 := Init_Val; -- CCITT Initial Value
+   function Update (Crc : Unsigned_16; Data : Byte_Array) return Unsigned_16 is
+      Local_CRC : Unsigned_16 := Crc;
+      Idx : Unsigned_8;
+      I : Integer := Data'First;
    begin
-      for I in Data'Range loop
-         CRC := Update (CRC, Data (I));
+      --  Unrolled loop (4x) for performance
+      while I <= Data'Last - 3 loop
+         Idx := Unsigned_8 (Shift_Right (Local_CRC, 8)) xor Data (I);
+         Local_CRC := Shift_Left (Local_CRC, 8) xor CRC_Table (Idx);
+
+         Idx := Unsigned_8 (Shift_Right (Local_CRC, 8)) xor Data (I + 1);
+         Local_CRC := Shift_Left (Local_CRC, 8) xor CRC_Table (Idx);
+
+         Idx := Unsigned_8 (Shift_Right (Local_CRC, 8)) xor Data (I + 2);
+         Local_CRC := Shift_Left (Local_CRC, 8) xor CRC_Table (Idx);
+
+         Idx := Unsigned_8 (Shift_Right (Local_CRC, 8)) xor Data (I + 3);
+         Local_CRC := Shift_Left (Local_CRC, 8) xor CRC_Table (Idx);
+
+         I := I + 4;
       end loop;
-      return CRC;
+
+      --  Handle remaining bytes
+      for K in I .. Data'Last loop
+         Idx := Unsigned_8 (Shift_Right (Local_CRC, 8)) xor Data (K);
+         Local_CRC := Shift_Left (Local_CRC, 8) xor CRC_Table (Idx);
+      end loop;
+
+      return Local_CRC;
+   end Update;
+
+   function Compute (Data : in Byte_Array) return Unsigned_16 is
+   begin
+      return Update (Init_Val, Data);
    end Compute;
 
 end CRC16;

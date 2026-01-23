@@ -3,7 +3,7 @@ with Interfaces; use Interfaces;
 package Packet_Types with SPARK_Mode is
 
    --  Constants
-   Max_Payload_Size : constant := 256;
+   Max_Payload_Size : constant := 255;
 
    --  Strongly typed Packet ID
    subtype Packet_ID_Type is Unsigned_8;
@@ -16,8 +16,11 @@ package Packet_Types with SPARK_Mode is
    --  If max is 256, we need a larger type. Let's strictly limit to 255 for byte-alignment simplicity.
    subtype Payload_Length_Type is Unsigned_8; 
 
-   --  Payload array
-   type Payload_Data_Type is array (Payload_Length_Type range 1 .. Payload_Length_Type'Last) of Unsigned_8;
+   --  Shared Byte Array type for zero-copy processing
+   type Byte_Array is array (Positive range <>) of Unsigned_8;
+
+   --  Payload array (Subtype of Byte_Array for zero-copy slicing)
+   subtype Payload_Data_Type is Byte_Array (1 .. Max_Payload_Size);
 
    --  Packet Record
    type Packet is record
