@@ -4,6 +4,6 @@ project AetherLink is
    for Main use ("main.adb");
 
    package Compiler is
-      for Default_Switches ("Ada") use ("-gnatwa", "-gnat2012", "-g");
+      for Default_Switches ("Ada") use ("-gnatwa", "-gnat2012", "-g", "-gnatW8");
    end Compiler;
 end AetherLink;

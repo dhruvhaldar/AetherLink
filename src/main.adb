@@ -30,7 +30,10 @@ procedure Main is
       C              : Character;
    begin
       while Offset < Length loop
-         Put ("   [HEX] ");
+         Put ("   ");
+         Put (To_Hex (Unsigned_8 (Shift_Right (Unsigned_16 (Offset), 8))));
+         Put (To_Hex (Unsigned_8 (Offset mod 256)));
+         Put (" | ");
 
          --  Print Hex
          for I in 1 .. Bytes_Per_Line loop
@@ -79,7 +82,7 @@ begin
    );
    Tx_Packet.Checksum := 12345; -- > 255 to test 16-bit serialization
 
-   Put_Line ("Generating Telemetry Packet...");
+   Put_Line ("📦 Generating Telemetry Packet...");
    Put_Line ("   ID:       " & Packet_ID_Type'Image(Tx_Packet.ID));
    Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Tx_Packet.Sequence));
    
@@ -87,7 +90,7 @@ begin
    Put_Line ("Serializing...");
    Serialize (Tx_Packet, Buffer, Last);
    
-   Put_Line ("Transmitting " & Natural'Image(Last) & " bytes.");
+   Put_Line ("📡 Transmitting " & Natural'Image(Last) & " bytes.");
    Print_Hex_Dump (Buffer, Last);
    New_Line;
    
@@ -97,7 +100,7 @@ begin
    Deserialize (Buffer(1 .. Last), Rx_Packet, Success);
    
    if Success then
-      Put_Line (C_Green & "Packet Received Successfully!" & C_Reset);
+      Put_Line (C_Green & "✅ Packet Received Successfully!" & C_Reset);
       Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
       Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       
@@ -116,14 +119,14 @@ begin
          -- Note: We do not compare Checksums here because Tx_Packet.Checksum is manual/dummy,
          -- whereas Rx_Packet.Checksum is computed by Serialize.
          -- The Deserialize function already verified the checksum validity.
-         Put_Line (C_Green & "VERIFICATION PASSED: Data integrity confirmed." & C_Reset);
+         Put_Line (C_Green & "✅ VERIFICATION PASSED: Data integrity confirmed." & C_Reset);
       else
-         Put_Line (C_Red & "VERIFICATION FAILED: Data mismatch." & C_Reset);
+         Put_Line (C_Red & "❌ VERIFICATION FAILED: Data mismatch." & C_Reset);
          Put_Line ("   Expected Sequence:" & Sequence_Number_Type'Image(Tx_Packet.Sequence));
          Put_Line ("   Got Sequence:     " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       end if;
    else
-      Put_Line (C_Red & "Packet Reception Failed." & C_Reset);
+      Put_Line (C_Red & "❌ Packet Reception Failed." & C_Reset);
    end if;
    
    New_Line;

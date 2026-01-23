@@ -5,3 +5,7 @@
 ## 2024-10-25 - Data Visualization Clarity
 **Learning:** Raw hex dumps are mentally taxing to parse. Adding a synchronized ASCII view provides immediate context for text-based payloads without sacrificing the precision of the hex view.
 **Action:** Always pair hex dumps with ASCII representations in CLI tools.
+
+## 2026-01-23 - Contextual CLI Formatting
+**Learning:** Static labels in hex dumps (like `[HEX]`) add noise without information. Using dynamic offsets (e.g., `0000 |`) provides crucial spatial context. Semantic emojis (📦, 📡, ✅) act as visual anchors, allowing users to scan the process flow instantly.
+**Action:** Prefer standard `Offset | Hex | ASCII` format and use emojis to denote process stages.

@@ -1,18 +1,18 @@
 
 [1m[36m=== AetherLink Flight Software Simulation ===[0m
 
-Generating Telemetry Packet...
+📦 Generating Telemetry Packet...
    ID:        1
    Sequence:  300
 Serializing...
-Transmitting  11 bytes.
-   [HEX] 01 01 2C 05 48 65 6C 6C 6F 00 C8                 | ..,.Hello..
+📡 Transmitting  11 bytes.
+   0000 | 01 01 2C 05 48 65 6C 6C 6F 00 C8                 | ..,.Hello..
 
 Receiving...
-[32mPacket Received Successfully![0m
+[32m✅ Packet Received Successfully![0m
    ID:        1
    Sequence:  300
    Payload:  Hello
-[32mVERIFICATION PASSED: Data integrity confirmed.[0m
+[32m✅ VERIFICATION PASSED: Data integrity confirmed.[0m
 
 [1m[36m=== End Simulation ===[0m
