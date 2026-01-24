@@ -17,7 +17,8 @@ package Packet_Types with SPARK_Mode is
    subtype Payload_Length_Type is Unsigned_8; 
 
    --  Payload array
-   type Payload_Data_Type is array (Payload_Length_Type range 1 .. Payload_Length_Type'Last) of Unsigned_8;
+   subtype Payload_Index is Positive range 1 .. Positive (Payload_Length_Type'Last);
+   type Payload_Data_Type is array (Payload_Index) of Unsigned_8;
 
    --  Packet Record
    type Packet is record

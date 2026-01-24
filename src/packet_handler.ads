@@ -1,9 +1,10 @@
 with Packet_Types; use Packet_Types;
 with Interfaces; use Interfaces;
+with CRC16;
 
 package Packet_Handler with SPARK_Mode is
 
-   type Byte_Array is array (Positive range <>) of Unsigned_8;
+   subtype Byte_Array is CRC16.Byte_Array;
 
    --  Serialize: Converts a Packet to a Byte_Array
    --  Pre: The byte array must be large enough to hold the packet.

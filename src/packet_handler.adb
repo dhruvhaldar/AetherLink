@@ -1,5 +1,3 @@
-with CRC16;
-
 package body Packet_Handler with SPARK_Mode is
 
    procedure Serialize (P : in Packet; Buffer : out Byte_Array; Last : out Natural) is
@@ -26,11 +24,13 @@ package body Packet_Handler with SPARK_Mode is
       
       --  Payload
       if P.Length > 0 then
-         for I in 1 .. P.Length loop
-            Buffer (Index) := P.Payload (I);
-            CRC := CRC16.Update (CRC, Buffer (Index));
-            Index := Index + 1;
-         end loop;
+         declare
+            Len : constant Natural := Natural (P.Length);
+         begin
+            Buffer (Index .. Index + Len - 1) := Byte_Array (P.Payload (1 .. Len));
+            CRC := CRC16.Update (CRC, Buffer (Index .. Index + Len - 1));
+            Index := Index + Len;
+         end;
       end if;
 
       --  Checksum (2 bytes, Big Endian)
@@ -79,11 +79,17 @@ package body Packet_Handler with SPARK_Mode is
          return;
       end if;
       
-      for I in 1 .. P.Length loop
-         P.Payload(I) := Buffer(Index);
-         Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
-         Index := Index + 1;
-      end loop;
+      declare
+         Len : constant Natural := Natural (P.Length);
+      begin
+         if Len > 0 then
+            for I in 1 .. Len loop
+               P.Payload (I) := Buffer (Index + I - 1);
+            end loop;
+            Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer (Index .. Index + Len - 1));
+            Index := Index + Len;
+         end if;
+      end;
 
       --  Checksum Extraction
       Received_CRC := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));

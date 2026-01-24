@@ -47,6 +47,28 @@ package body CRC16 with SPARK_Mode is
       return Shift_Left (Crc, 8) xor CRC_Table (Index);
    end Update;
 
+   function Update (Crc : Unsigned_16; Data : Byte_Array) return Unsigned_16 is
+      Local_Crc : Unsigned_16 := Crc;
+      Index     : Integer := Data'First;
+   begin
+      --  4x Loop Unrolling for performance
+      while Index <= Data'Last - 3 loop
+         Local_Crc := Update (Local_Crc, Data (Index));
+         Local_Crc := Update (Local_Crc, Data (Index + 1));
+         Local_Crc := Update (Local_Crc, Data (Index + 2));
+         Local_Crc := Update (Local_Crc, Data (Index + 3));
+         Index := Index + 4;
+      end loop;
+
+      --  Handle remaining bytes
+      while Index <= Data'Last loop
+         Local_Crc := Update (Local_Crc, Data (Index));
+         Index := Index + 1;
+      end loop;
+
+      return Local_Crc;
+   end Update;
+
    function Compute (Data : in String) return Unsigned_16 is
       CRC : Unsigned_16 := Init_Val; -- CCITT Initial Value
    begin
@@ -57,12 +79,8 @@ package body CRC16 with SPARK_Mode is
    end Compute;
 
    function Compute (Data : in Byte_Array) return Unsigned_16 is
-      CRC : Unsigned_16 := Init_Val; -- CCITT Initial Value
    begin
-      for I in Data'Range loop
-         CRC := Update (CRC, Data (I));
-      end loop;
-      return CRC;
+      return Update (Init_Val, Data);
    end Compute;
 
 end CRC16;

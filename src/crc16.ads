@@ -13,4 +13,7 @@ package CRC16 with SPARK_Mode is
    --  Incremental update
    function Update (Crc : Unsigned_16; Val : Unsigned_8) return Unsigned_16;
 
+   --  Block update
+   function Update (Crc : Unsigned_16; Data : Byte_Array) return Unsigned_16;
+
 end CRC16;
