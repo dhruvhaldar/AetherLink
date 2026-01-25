@@ -93,8 +93,8 @@ package body Packet_Handler with SPARK_Mode is
 
       --  Zero-initialize unused payload to prevent stale data leaks
       if P.Length < Payload_Length_Type'Last then
-         for I in P.Length + 1 .. Payload_Length_Type'Last loop
-            P.Payload (I) := 0;
+         for I in Natural(P.Length) + 1 .. Natural(Payload_Length_Type'Last) loop
+            P.Payload (Payload_Index(I)) := 0;
          end loop;
       end if;
 

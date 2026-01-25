@@ -9,3 +9,7 @@
 ## 2024-10-26 - Visual Hierarchy in CLI
 **Learning:** In dense data displays (like hex dumps), using distinct colors for metadata (offsets) vs. content reduces cognitive load and improves scannability.
 **Action:** Use dimmed or distinct colors for line numbers, offsets, and separators in CLI output.
+
+## 2024-10-27 - Emojis in Low-Level CLI
+**Learning:** Adding emojis to system-level CLI tools (like satellite sims) makes them feel modern and reduces intimidation, but requires careful handling of string encodings in strict languages like Ada.
+**Action:** Use emojis as status indicators (📦, ✅, ❌) but ensure the build system or string handling supports UTF-8 bytes transparently.
