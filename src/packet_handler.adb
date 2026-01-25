@@ -51,33 +51,46 @@ package body Packet_Handler with SPARK_Mode is
    begin
       Success := False;
       
+      --  Initialize P to a safe empty state to prevent stale data leakage on error
+      P := (ID => 0, Sequence => 0, Length => 0, Payload => (others => 0), Checksum => 0);
+
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
          return;
       end if;
       
-      P.ID := Buffer(Index);
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
-      Index := Index + 1;
-      
-      --  Sequence (Big Endian)
-      P.Sequence := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index + 1));
-      Index := Index + 2;
-      
-      Computed_Len := Buffer(Index);
-      P.Length := Computed_Len;
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
-      Index := Index + 1;
-      
-      --  Check if buffer has enough data for payload + checksum
-      --  Current Index points to start of Payload.
-      --  We need P.Length bytes for payload + 2 bytes for checksum.
-      --  We use subtraction to avoid overflow when Buffer is at the end of memory.
-      if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
-         return;
-      end if;
+      --  Parse Header using Temp variables to avoid partial updates to P
+      declare
+         Temp_ID  : Packet_ID_Type;
+         Temp_Seq : Sequence_Number_Type;
+      begin
+         Temp_ID := Buffer(Index);
+         Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
+         Index := Index + 1;
+
+         --  Sequence (Big Endian)
+         Temp_Seq := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
+         Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
+         Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index + 1));
+         Index := Index + 2;
+
+         Computed_Len := Buffer(Index);
+         Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
+         Index := Index + 1;
+
+         --  Check if buffer has enough data for payload + checksum
+         --  Current Index points to start of Payload.
+         --  We need Computed_Len bytes for payload + 2 bytes for checksum.
+         --  We use subtraction to avoid overflow when Buffer is at the end of memory.
+         if Natural(Computed_Len) + 2 > (Buffer'Last - Index) + 1 then
+            return;
+         end if;
+
+         --  Safe to update P now
+         P.ID := Temp_ID;
+         P.Sequence := Temp_Seq;
+         P.Length := Computed_Len;
+      end;
       
       declare
          Len : constant Natural := Natural (P.Length);
@@ -93,7 +106,7 @@ package body Packet_Handler with SPARK_Mode is
 
       --  Zero-initialize unused payload to prevent stale data leaks
       if P.Length < Payload_Length_Type'Last then
-         for I in P.Length + 1 .. Payload_Length_Type'Last loop
+         for I in Natural (P.Length) + 1 .. Natural (Payload_Length_Type'Last) loop
             P.Payload (I) := 0;
          end loop;
       end if;

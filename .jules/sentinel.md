@@ -13,3 +13,8 @@
 **Vulnerability:** `Packet_Handler.Deserialize` left the unused portion of the `Packet.Payload` array uninitialized. Since `Packet` is an `out` parameter, calling it with a reused variable resulted in stale data persisting in the upper bytes of the payload.
 **Learning:** In Ada, `out` parameters for composite types (like records with arrays) do not guarantee zero-initialization of fields or array elements that are not explicitly assigned. Partial assignment leaves the rest undefined (or stale).
 **Prevention:** Explicitly zero-initialize unused buffer areas in `out` parameters, especially when handling fixed-size buffers with variable length data, to prevent information leakage.
+
+## 2024-05-24 - Partial Update on Error
+**Vulnerability:** `Deserialize` updated the `Length` field of the output packet `P` before verifying if the buffer actually contained that much data. When validation failed, `P` was left in an inconsistent state (`Length` indicating data that wasn't there), potentially leading to stale data usage by the caller.
+**Learning:** `out` parameters should be treated transactionally. If a function fails (returns `False` or raises exception), the `out` parameter should ideally be left in a safe/empty state, or at least not in a misleading state.
+**Prevention:** Use local temporary variables to parse and validate headers. Only update the output record once all validations (especially length checks) pass. Initialize output objects to a safe empty state at the beginning of the procedure.
