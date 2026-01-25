@@ -5,3 +5,7 @@
 ## 2024-05-23 - Ada Slice Assignment Strategy
 **Learning:** Assigning a slice of an unconstrained array (Buffer) to a constrained array (Payload) requires an explicit loop because direct conversion fails on bound mismatch. However, the reverse (assigning a constrained slice to an unconstrained buffer) works efficiently with a view conversion (e.g., `Byte_Array(Payload_Slice)`).
 **Action:** Use slice assignment with view conversion for Serialize (Payload -> Buffer) optimizations, but fallback to explicit loops for Deserialize (Buffer -> Payload) to avoid constraint errors.
+
+## 2024-05-24 - Ada Performance: Pragma Inline & Array Initialization
+**Learning:** `pragma Inline` is critical for small helper functions (like CRC updates) in Ada. Without it, the function call overhead can dominate execution time in tight loops, resulting in a ~4x performance penalty in this codebase. Aggregate assignment for array clearing allows compiler optimizations (e.g. memset) that are significantly faster than explicit loops.
+**Action:** Always verify `pragma Inline` is applied to small, frequently called utility functions in hot paths. Use aggregate assignment `(others => ...)` for buffer initialization.
