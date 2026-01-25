@@ -23,6 +23,18 @@ procedure Main is
       return Hex_Digits(Natural(B / 16)) & Hex_Digits(Natural(B mod 16));
    end To_Hex;
 
+   function To_Hex (N : Natural) return String is
+      Hex_Digits : constant array (0 .. 15) of Character := "0123456789ABCDEF";
+      Result     : String (1 .. 4);
+      Val        : Natural := N;
+   begin
+      for I in reverse 1 .. 4 loop
+         Result(I) := Hex_Digits(Val mod 16);
+         Val := Val / 16;
+      end loop;
+      return Result;
+   end To_Hex;
+
    procedure Print_Hex_Dump (Data : Byte_Array; Length : Natural) is
       Bytes_Per_Line : constant Natural := 16;
       Offset         : Natural := 0;
@@ -30,7 +42,7 @@ procedure Main is
       C              : Character;
    begin
       while Offset < Length loop
-         Put ("   [HEX] ");
+         Put (C_Cyan & To_Hex(Offset) & " | " & C_Reset);
 
          --  Print Hex
          for I in 1 .. Bytes_Per_Line loop
