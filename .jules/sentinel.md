@@ -13,3 +13,8 @@
 **Vulnerability:** `Packet_Handler.Deserialize` left the unused portion of the `Packet.Payload` array uninitialized. Since `Packet` is an `out` parameter, calling it with a reused variable resulted in stale data persisting in the upper bytes of the payload.
 **Learning:** In Ada, `out` parameters for composite types (like records with arrays) do not guarantee zero-initialization of fields or array elements that are not explicitly assigned. Partial assignment leaves the rest undefined (or stale).
 **Prevention:** Explicitly zero-initialize unused buffer areas in `out` parameters, especially when handling fixed-size buffers with variable length data, to prevent information leakage.
+
+## 2024-05-24 - Uninitialized Out Parameters on Early Return
+**Vulnerability:** Procedures with `out` parameters returned early on error conditions (e.g., input buffer too short) without initializing the output record, leaving it with caller-supplied (potentially sensitive) data.
+**Learning:** In Ada, `out` parameters are undefined if the procedure returns without assigning them. Unlike some languages where defaults might apply, Ada leaves the responsibility to the callee.
+**Prevention:** Always initialize all `out` parameters to safe default values (e.g., via aggregate assignment) at the very beginning of the procedure, before any conditional checks or early returns.

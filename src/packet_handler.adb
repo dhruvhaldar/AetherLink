@@ -49,6 +49,13 @@ package body Packet_Handler with SPARK_Mode is
       Calculated_CRC : Unsigned_16 := CRC16.Init_Val;
       Received_CRC   : Unsigned_16;
    begin
+      --  Initialize output packet to safe defaults to prevent data leaks on error
+      P := (ID       => 0,
+            Sequence => 0,
+            Length   => 0,
+            Payload  => (others => 0),
+            Checksum => 0);
+
       Success := False;
       
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
