@@ -13,3 +13,7 @@
 ## 2024-10-27 - Emojis in Low-Level CLI
 **Learning:** Adding emojis to system-level CLI tools (like satellite sims) makes them feel modern and reduces intimidation, but requires careful handling of string encodings in strict languages like Ada.
 **Action:** Use emojis as status indicators (📦, ✅, ❌) but ensure the build system or string handling supports UTF-8 bytes transparently.
+
+## 2024-10-28 - Bridging High and Low Level Views
+**Learning:** Displaying hex values alongside high-level decimal fields (like IDs and Sequences) helps users mentally map the structured data to the raw hex dump, reducing cognitive load during debugging.
+**Action:** Annotate key integer fields in CLI output with their hex representation, especially when a hex dump is also provided.

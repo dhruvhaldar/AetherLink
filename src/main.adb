@@ -16,6 +16,7 @@ procedure Main is
    C_Red     : constant String := ASCII.ESC & "[31m";
    C_Cyan    : constant String := ASCII.ESC & "[36m";
    C_Bold    : constant String := ASCII.ESC & "[1m";
+   C_Grey    : constant String := ASCII.ESC & "[90m";
 
    function To_Hex (B : Unsigned_8) return String is
       Hex_Digits : constant array (0 .. 15) of Character := "0123456789ABCDEF";
@@ -93,8 +94,10 @@ begin
    Tx_Packet.Checksum := 12345; -- > 255 to test 16-bit serialization
 
    Put_Line ("📦 Generating Telemetry Packet...");
-   Put_Line ("   ID:       " & Packet_ID_Type'Image(Tx_Packet.ID));
-   Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Tx_Packet.Sequence));
+   Put_Line ("   ID:       " & Packet_ID_Type'Image(Tx_Packet.ID) &
+             C_Grey & " (0x" & To_Hex(Tx_Packet.ID) & ")" & C_Reset);
+   Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Tx_Packet.Sequence) &
+             C_Grey & " (0x" & To_Hex(Natural(Tx_Packet.Sequence)) & ")" & C_Reset);
    
    --  Serialize
    Put_Line ("⚙️  Serializing...");
@@ -111,8 +114,10 @@ begin
    
    if Success then
       Put_Line (C_Green & "✅ Packet Received Successfully!" & C_Reset);
-      Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
-      Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
+      Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID) &
+                C_Grey & " (0x" & To_Hex(Rx_Packet.ID) & ")" & C_Reset);
+      Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence) &
+                C_Grey & " (0x" & To_Hex(Natural(Rx_Packet.Sequence)) & ")" & C_Reset);
       
       --  Convert Payload back to string for display
       declare
