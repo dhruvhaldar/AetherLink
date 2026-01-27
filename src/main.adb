@@ -1,4 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Strings; use Ada.Strings;
+with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Packet_Types; use Packet_Types;
 with Packet_Handler; use Packet_Handler;
 with Interfaces; use Interfaces;
@@ -16,6 +18,7 @@ procedure Main is
    C_Red     : constant String := ASCII.ESC & "[31m";
    C_Cyan    : constant String := ASCII.ESC & "[36m";
    C_Bold    : constant String := ASCII.ESC & "[1m";
+   C_Dim     : constant String := ASCII.ESC & "[90m";
 
    function To_Hex (B : Unsigned_8) return String is
       Hex_Digits : constant array (0 .. 15) of Character := "0123456789ABCDEF";
@@ -64,7 +67,7 @@ procedure Main is
                   C := Character'Val (B);
                   Put (C);
                else
-                  Put ('.');
+                  Put (C_Dim & "." & C_Reset);
                end if;
             end if;
          end loop;
@@ -100,7 +103,7 @@ begin
    Put_Line ("⚙️  Serializing...");
    Serialize (Tx_Packet, Buffer, Last);
    
-   Put_Line ("📡 Transmitting " & Natural'Image(Last) & " bytes.");
+   Put_Line ("📡 Transmitting " & Trim (Natural'Image (Last), Left) & " bytes.");
    Print_Hex_Dump (Buffer, Last);
    New_Line;
    
