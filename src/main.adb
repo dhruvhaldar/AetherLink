@@ -10,7 +10,7 @@ procedure Main is
    Rx_Packet : Packet;
    Buffer    : Byte_Array (1 .. 1024);
    Last      : Natural;
-   Success   : Boolean;
+   Status    : Packet_Status;
 
    --  ANSI Color Codes
    C_Reset   : constant String := ASCII.ESC & "[0m";
@@ -110,9 +110,9 @@ begin
    --  Simulate Transmission (Loopback)
    --  Deserialize
    Put_Line ("📥 Receiving...");
-   Deserialize (Buffer(1 .. Last), Rx_Packet, Success);
+   Deserialize (Buffer(1 .. Last), Rx_Packet, Status);
    
-   if Success then
+   if Status = Success then
       Put_Line (C_Green & "✅ Packet Received Successfully!" & C_Reset);
       Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
       Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
@@ -139,7 +139,7 @@ begin
          Put_Line ("   Got Sequence:     " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       end if;
    else
-      Put_Line (C_Red & "❌ Packet Reception Failed." & C_Reset);
+      Put_Line (C_Red & "❌ Packet Reception Failed: " & Packet_Status'Image(Status) & C_Reset);
    end if;
    
    New_Line;

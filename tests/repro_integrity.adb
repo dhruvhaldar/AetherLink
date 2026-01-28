@@ -8,7 +8,7 @@ procedure Repro_Integrity is
    --  Buffer for a minimal valid packet:
    --  ID(1) + Seq(2) + Len(1) + Payload(1) + Checksum(2) = 7 bytes
    Buffer    : Byte_Array (1 .. 7);
-   Success   : Boolean;
+   Status    : Packet_Status;
 
 begin
    Put_Line ("=== Reproduction Test: Integrity Check Bypass ===");
@@ -26,9 +26,9 @@ begin
    Buffer(7) := 0;
 
    Put_Line ("Deserializing packet with INVALID checksum...");
-   Deserialize (Buffer, Rx_Packet, Success);
+   Deserialize (Buffer, Rx_Packet, Status);
 
-   if Success then
+   if Status = Success then
       Put_Line ("VULNERABILITY CONFIRMED: Packet accepted despite invalid checksum.");
    else
       Put_Line ("SECURE: Packet rejected due to invalid checksum.");
