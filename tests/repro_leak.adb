@@ -6,7 +6,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure Repro_Leak is
    P : Packet;
    Buffer : Byte_Array (1 .. 10);
-   Success : Boolean;
+   Status : Packet_Status;
    Last : Natural;
 
    -- Helper to print failure
@@ -68,9 +68,9 @@ begin
 
    -- 3. Call Deserialize
    -- Note: P has 0xFF in Payload(2..255)
-   Deserialize (Buffer, P, Success);
+   Deserialize (Buffer, P, Status);
 
-   if not Success then
+   if Status /= Success then
       Put_Line ("Setup Error: Deserialize returned False. Check test setup.");
       return;
    end if;

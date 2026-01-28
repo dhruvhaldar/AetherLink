@@ -17,3 +17,7 @@
 ## 2024-10-28 - Reducing Visual Noise in Hex Dumps
 **Learning:** High-contrast placeholders (like bright `.` for non-printable chars) compete with actual data. Dimming them shifts focus to the meaningful ASCII content.
 **Action:** Use dimmed colors (ANSI `\e[90m`) for placeholders and structural separators to let the data shine.
+
+## 2024-10-29 - Actionable Error States
+**Learning:** Generic "Success/Fail" booleans in low-level APIs force the UI to be vague ("Operation Failed"). Returning specific status enums allows the CLI to give actionable feedback (e.g., "Checksum Error" vs "Buffer Underflow"), turning a frustrating debugging session into a quick fix.
+**Action:** Replace `Boolean` success flags with specific `Status` enums in public APIs to enable rich error reporting.

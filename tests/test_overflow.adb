@@ -8,7 +8,7 @@ procedure Test_Overflow is
    --  Positive'Last is usually 2**31 - 1.
    Buffer : Byte_Array (Positive'Last - 10 .. Positive'Last) := (others => 0);
    P      : Packet;
-   Success : Boolean;
+   Status : Packet_Status;
 begin
    Put_Line ("Testing for integer overflow at Positive'Last...");
 
@@ -39,7 +39,7 @@ begin
    --  We use Length = 0 to hit the Buffer'Last + 1 check specifically.
 
    begin
-      Deserialize (Buffer, P, Success);
+      Deserialize (Buffer, P, Status);
       Put_Line ("SAFE: Deserialize completed without crashing.");
    exception
       when Constraint_Error =>

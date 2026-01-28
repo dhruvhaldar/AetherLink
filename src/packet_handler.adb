@@ -1,3 +1,5 @@
+with Interfaces; use Interfaces;
+
 package body Packet_Handler with SPARK_Mode is
 
    procedure Serialize (P : in Packet; Buffer : out Byte_Array; Last : out Natural) is
@@ -43,7 +45,7 @@ package body Packet_Handler with SPARK_Mode is
       Last := Index - 1; -- Last points to the last written index
    end Serialize;
 
-   procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Success : out Boolean) is
+   procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Status : out Packet_Status) is
       Index : Natural := Buffer'First;
       Computed_Len : Unsigned_8;
       Calculated_CRC : Unsigned_16 := CRC16.Init_Val;
@@ -51,10 +53,11 @@ package body Packet_Handler with SPARK_Mode is
    begin
       --  Secure default initialization
       P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
-      Success := False;
+      Status := Buffer_Underflow;
       
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
+         Status := Buffer_Underflow;
          return;
       end if;
       
@@ -78,6 +81,7 @@ package body Packet_Handler with SPARK_Mode is
       --  We need P.Length bytes for payload + 2 bytes for checksum.
       --  We use subtraction to avoid overflow when Buffer is at the end of memory.
       if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
+         Status := Payload_Length_Error;
          return;
       end if;
       
@@ -105,9 +109,9 @@ package body Packet_Handler with SPARK_Mode is
       P.Checksum   := Received_CRC;
 
       if Calculated_CRC = Received_CRC then
-         Success := True;
+         Status := Success;
       else
-         Success := False;
+         Status := Checksum_Error;
       end if;
    end Deserialize;
 
