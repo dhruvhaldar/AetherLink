@@ -13,3 +13,7 @@
 ## 2024-10-27 - Emojis in Low-Level CLI
 **Learning:** Adding emojis to system-level CLI tools (like satellite sims) makes them feel modern and reduces intimidation, but requires careful handling of string encodings in strict languages like Ada.
 **Action:** Use emojis as status indicators (📦, ✅, ❌) but ensure the build system or string handling supports UTF-8 bytes transparently.
+
+## 2024-10-28 - Reducing Visual Noise in Hex Dumps
+**Learning:** High-contrast placeholders (like bright `.` for non-printable chars) compete with actual data. Dimming them shifts focus to the meaningful ASCII content.
+**Action:** Use dimmed colors (ANSI `\e[90m`) for placeholders and structural separators to let the data shine.
