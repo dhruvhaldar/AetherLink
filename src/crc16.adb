@@ -50,19 +50,30 @@ package body CRC16 with SPARK_Mode is
    function Update (Crc : Unsigned_16; Data : Byte_Array) return Unsigned_16 is
       Local_Crc : Unsigned_16 := Crc;
       Index     : Integer := Data'First;
+
+      --  Inline helper to avoid code duplication while maintaining performance
+      procedure Step (B : Unsigned_8) with Inline is
+         Tbl_Idx : Unsigned_8;
+      begin
+         Tbl_Idx   := Unsigned_8 (Shift_Right (Local_Crc, 8)) xor B;
+         Local_Crc := Shift_Left (Local_Crc, 8) xor CRC_Table (Tbl_Idx);
+      end Step;
+
    begin
       --  4x Loop Unrolling for performance
+      --  We use a local inlined Step procedure to avoid function call overhead
+      --  of the external Update function, while keeping the unrolled loop clean.
       while Index <= Data'Last - 3 loop
-         Local_Crc := Update (Local_Crc, Data (Index));
-         Local_Crc := Update (Local_Crc, Data (Index + 1));
-         Local_Crc := Update (Local_Crc, Data (Index + 2));
-         Local_Crc := Update (Local_Crc, Data (Index + 3));
+         Step (Data (Index));
+         Step (Data (Index + 1));
+         Step (Data (Index + 2));
+         Step (Data (Index + 3));
          Index := Index + 4;
       end loop;
 
       --  Handle remaining bytes
       while Index <= Data'Last loop
-         Local_Crc := Update (Local_Crc, Data (Index));
+         Step (Data (Index));
          Index := Index + 1;
       end loop;
 
