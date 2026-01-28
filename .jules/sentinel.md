@@ -18,3 +18,7 @@
 **Vulnerability:** `Packet_Handler.Deserialize` returned early upon validation failure (e.g., buffer too short) without writing to the `out` parameter `P`. This left the entire `Packet` record uninitialized (or containing stale stack data) in the caller's context.
 **Learning:** `out` parameters in Ada are not automatically initialized. If a procedure raises an exception or returns early without assigning to them, their value is undefined (potentially sensitive garbage).
 **Prevention:** Always initialize `out` parameters to a safe default state (e.g., zeroed) at the very beginning of the procedure, before any validation checks that might cause an early return.
+## 2024-05-21 - [Integer Overflow in Unrolled Loops]
+**Vulnerability:** CRC16.Update calculation crashed with Constraint_Error when processing buffers at the very end of memory address space (Positive'Last).
+**Learning:** Manual loop unrolling combined with fixed increments can overshoot bounds if checked against 'Last - X' but updated by '+ Y', creating an unchecked gap where overflow occurs.
+**Prevention:** Guard loop increments near type boundaries, or use 'exit when' conditions to terminate loops before incrementing past the limit.
