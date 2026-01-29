@@ -68,12 +68,19 @@ package body CRC16 with SPARK_Mode is
          Step (Data (Index + 1));
          Step (Data (Index + 2));
          Step (Data (Index + 3));
+
+         --  Check for overflow before incrementing near Integer'Last
+         if Index > Integer'Last - 4 then
+            return Local_Crc;
+         end if;
+
          Index := Index + 4;
       end loop;
 
       --  Handle remaining bytes
       while Index <= Data'Last loop
          Step (Data (Index));
+         exit when Index = Data'Last;
          Index := Index + 1;
       end loop;
 
