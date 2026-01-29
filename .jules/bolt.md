@@ -13,3 +13,7 @@
 ## 2024-05-24 - Ada Array Zero-Initialization
 **Learning:** Replacing an explicit loop `for I in Range loop Arr(I) := 0; end loop;` with aggregate slice assignment `Arr(Range) := (others => 0);` yields massive performance gains (approx 90x for 250 bytes) as the compiler optimizes it to `memset`.
 **Action:** Always use aggregate assignment for clearing arrays or slices in Ada.
+
+## 2024-05-24 - Ada Small Block Batching Overhead
+**Learning:** Manually batching CRC updates for small blocks (4 bytes) using slice passing was slower than simple repeated function calls. The overhead of slice creation and block function setup (loop, locals) outweighed the savings from reduced function calls. However, enabling global compiler optimizations (`-O3`, `-gnatn`) combined with `pragma Inline` provided a massive speedup (~3.4x) by optimizing the simple calls effectively.
+**Action:** Prefer compiler flags (`-O3`, `-gnatn`) and `pragma Inline` over manual batching for small data chunks.
