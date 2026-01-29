@@ -5,7 +5,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 procedure Repro_Fail_Leak is
    P : Packet;
-   Success : Boolean;
+   Status : Packet_Status;
 begin
    Put_Line ("Sentinel: Testing for data leakage in Deserialize failure...");
 
@@ -23,10 +23,10 @@ begin
    declare
       Short_Buf : Byte_Array (1 .. 4) := (others => 0);
    begin
-       Deserialize (Short_Buf, P, Success);
+       Deserialize (Short_Buf, P, Status);
    end;
 
-   if Success then
+   if Status = Success then
       Put_Line ("Setup Error: Deserialize returned True for short buffer.");
       return;
    end if;
