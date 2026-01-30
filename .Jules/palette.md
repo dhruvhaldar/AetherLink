@@ -21,3 +21,7 @@
 ## 2024-10-29 - Actionable Error States
 **Learning:** Generic "Success/Fail" booleans in low-level APIs force the UI to be vague ("Operation Failed"). Returning specific status enums allows the CLI to give actionable feedback (e.g., "Checksum Error" vs "Buffer Underflow"), turning a frustrating debugging session into a quick fix.
 **Action:** Replace `Boolean` success flags with specific `Status` enums in public APIs to enable rich error reporting.
+
+## 2024-10-30 - Human-Readable Enum Mapping
+**Learning:** Printing raw enum values (like `CHECKSUM_ERROR`) in CLI tools is functional but hostile to non-experts.
+**Action:** Implement helper functions (e.g., `Get_Status_Message`) to map enums to full sentences with context/recovery hints.

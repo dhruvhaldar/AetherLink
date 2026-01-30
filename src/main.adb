@@ -38,6 +38,20 @@ procedure Main is
       return Result;
    end To_Hex;
 
+   function Get_Status_Message (S : Packet_Status) return String is
+   begin
+      case S is
+         when Success =>
+            return "Operation completed successfully.";
+         when Buffer_Underflow =>
+            return "Buffer Underflow - Packet is too short to contain a valid header.";
+         when Payload_Length_Error =>
+            return "Payload Length Error - Declared length exceeds actual data size.";
+         when Checksum_Error =>
+            return "Checksum Error - Data integrity verification failed.";
+      end case;
+   end Get_Status_Message;
+
    procedure Print_Hex_Dump (Data : Byte_Array; Length : Natural) is
       Bytes_Per_Line : constant Natural := 16;
       Offset         : Natural := 0;
@@ -139,7 +153,7 @@ begin
          Put_Line ("   Got Sequence:     " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       end if;
    else
-      Put_Line (C_Red & "❌ Packet Reception Failed: " & Packet_Status'Image(Status) & C_Reset);
+      Put_Line (C_Red & "❌ Packet Reception Failed: " & Get_Status_Message(Status) & C_Reset);
    end if;
    
    New_Line;
