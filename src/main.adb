@@ -131,12 +131,18 @@ begin
       Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
       Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       
-      --  Convert Payload back to string for display
+      --  Convert Payload back to string for display (Sanitized)
       declare
          Msg : String (1 .. Natural(Rx_Packet.Length));
+         C   : Character;
       begin
          for I in 1 .. Rx_Packet.Length loop
-            Msg(Natural(I)) := Character'Val(Rx_Packet.Payload(Natural(I)));
+            C := Character'Val(Rx_Packet.Payload(Natural(I)));
+            if Character'Pos(C) >= 32 and then Character'Pos(C) <= 126 then
+               Msg(Natural(I)) := C;
+            else
+               Msg(Natural(I)) := '.';
+            end if;
          end loop;
          Put_Line ("   Payload:  " & Msg);
       end;

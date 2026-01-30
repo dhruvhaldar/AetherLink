@@ -22,3 +22,8 @@
 **Vulnerability:** CRC16.Update calculation crashed with Constraint_Error when processing buffers at the very end of memory address space (Positive'Last).
 **Learning:** Manual loop unrolling combined with fixed increments can overshoot bounds if checked against 'Last - X' but updated by '+ Y', creating an unchecked gap where overflow occurs.
 **Prevention:** Guard loop increments near type boundaries, or use 'exit when' conditions to terminate loops before incrementing past the limit.
+
+## 2024-05-25 - [Terminal Injection in CLI Output]
+**Vulnerability:** The simulation CLI printed raw packet payloads to the terminal. Malicious payloads containing ANSI escape codes could manipulate the terminal display (Terminal Injection).
+**Learning:** Even in "simulation" or CLI tools, outputting untrusted binary data as strings requires sanitization to prevent log spoofing or terminal corruption.
+**Prevention:** Implement a `Sanitize` function that replaces non-printable control characters (outside 32-126 range) with a safe placeholder (e.g., `.`) before printing any untrusted string.
