@@ -97,11 +97,6 @@ package body Packet_Handler with SPARK_Mode is
          end if;
       end;
 
-      --  Zero-initialize unused payload to prevent stale data leaks
-      if P.Length < Payload_Length_Type'Last then
-         P.Payload (Payload_Index (Natural (P.Length) + 1) .. Payload_Index'Last) := (others => 0);
-      end if;
-
       --  Checksum Extraction
       Received_CRC := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
       P.Checksum   := Received_CRC;
