@@ -27,3 +27,8 @@
 **Vulnerability:** The simulation CLI printed raw packet payloads to the terminal. Malicious payloads containing ANSI escape codes could manipulate the terminal display (Terminal Injection).
 **Learning:** Even in "simulation" or CLI tools, outputting untrusted binary data as strings requires sanitization to prevent log spoofing or terminal corruption.
 **Prevention:** Implement a `Sanitize` function that replaces non-printable control characters (outside 32-126 range) with a safe placeholder (e.g., `.`) before printing any untrusted string.
+
+## 2024-05-26 - [Integer Overflow in Serialize Index]
+**Vulnerability:** `Packet_Handler.Serialize` unconditionally incremented its `Index` variable after writing the final byte. If the output buffer was located at the very end of the memory address space (`Positive'Last`), this increment caused a `Constraint_Error` (Integer Overflow).
+**Learning:** Sequential processing loops that maintain a "next available index" pointer must be careful not to increment that pointer past the type's upper bound after the final write, even if the pointer is never used again.
+**Prevention:** Avoid the final pointer increment in sequential write operations, or ensure the pointer type has a range larger than the buffer index type (if possible), or assign the `Last` index directly from the current position instead of `Next - 1`.

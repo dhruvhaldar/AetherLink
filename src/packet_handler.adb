@@ -40,9 +40,8 @@ package body Packet_Handler with SPARK_Mode is
       Index := Index + 1;
       
       Buffer(Index) := Unsigned_8 (CRC and 16#FF#);
-      Index := Index + 1;
       
-      Last := Index - 1; -- Last points to the last written index
+      Last := Index; -- Last points to the last written index
    end Serialize;
 
    procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Status : out Packet_Status) is
