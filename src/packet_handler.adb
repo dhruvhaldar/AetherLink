@@ -81,6 +81,8 @@ package body Packet_Handler with SPARK_Mode is
       --  We use subtraction to avoid overflow when Buffer is at the end of memory.
       if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
          Status := Payload_Length_Error;
+         --  Fail Secure: Reset Packet to prevent partial data leakage
+         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
          return;
       end if;
       
@@ -104,6 +106,8 @@ package body Packet_Handler with SPARK_Mode is
          Status := Success;
       else
          Status := Checksum_Error;
+         --  Fail Secure: Reset Packet to prevent usage of corrupted data
+         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
       end if;
    end Deserialize;
 
