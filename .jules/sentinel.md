@@ -32,3 +32,8 @@
 **Vulnerability:** `Packet_Handler.Serialize` unconditionally incremented its `Index` variable after writing the final byte. If the output buffer was located at the very end of the memory address space (`Positive'Last`), this increment caused a `Constraint_Error` (Integer Overflow).
 **Learning:** Sequential processing loops that maintain a "next available index" pointer must be careful not to increment that pointer past the type's upper bound after the final write, even if the pointer is never used again.
 **Prevention:** Avoid the final pointer increment in sequential write operations, or ensure the pointer type has a range larger than the buffer index type (if possible), or assign the `Last` index directly from the current position instead of `Next - 1`.
+
+## 2024-05-27 - Partial Data Leakage on Error
+**Vulnerability:** `Packet_Handler.Deserialize` initialized the output packet to zero at the start, but subsequent parsing populated fields before final validation checks (like checksum). When these checks failed, the procedure returned with the output packet containing partially parsed (potentially invalid or malicious) data.
+**Learning:** Initializing `out` parameters at the entry point is necessary but not sufficient for atomic failure. If a procedure builds a result incrementally, an error in a later stage leaves the `out` parameter in an intermediate "dirty" state.
+**Prevention:** Implement "Fail Secure" logic by explicitly re-zeroing or invalidating complex `out` parameters immediately upon detecting an error, ensuring the caller never receives partial or corrupted data.
