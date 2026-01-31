@@ -25,3 +25,7 @@
 ## 2024-10-30 - Human-Readable Enum Mapping
 **Learning:** Printing raw enum values (like `CHECKSUM_ERROR`) in CLI tools is functional but hostile to non-experts.
 **Action:** Implement helper functions (e.g., `Get_Status_Message`) to map enums to full sentences with context/recovery hints.
+
+## 2024-10-31 - Zero-Dimming for Sparse Data
+**Learning:** In sparse hex dumps (common in packet structures), the visual weight of '00' is equal to meaningful data, making patterns hard to spot. Dimming '00' bytes dramatically improves scannability.
+**Action:** Use dimmed colors for zero values in hex dumps to highlight non-zero data.

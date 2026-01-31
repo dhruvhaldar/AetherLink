@@ -58,16 +58,24 @@ procedure Main is
       B              : Unsigned_8;
       C              : Character;
    begin
-      Put_Line (C_Cyan & "ADDR | 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F | ASCII" & C_Reset);
+      Put_Line (C_Cyan & "ADDR | 00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F | ASCII" & C_Reset);
       while Offset < Length loop
          Put (C_Cyan & To_Hex(Offset) & " | " & C_Reset);
 
          --  Print Hex
          for I in 1 .. Bytes_Per_Line loop
             if Offset + I <= Length then
-               Put (To_Hex (Data (Data'First + Offset + I - 1)) & " ");
+               B := Data (Data'First + Offset + I - 1);
+               if B = 0 then
+                  Put (C_Dim & "00" & C_Reset & " ");
+               else
+                  Put (To_Hex (B) & " ");
+               end if;
             else
                Put ("   "); -- Padding for incomplete lines
+            end if;
+            if I = 8 then
+               Put (" "); -- Extra space for grouping
             end if;
          end loop;
 
