@@ -17,3 +17,7 @@
 ## 2024-05-24 - Ada Small Block Batching Overhead
 **Learning:** Manually batching CRC updates for small blocks (4 bytes) using slice passing was slower than simple repeated function calls. The overhead of slice creation and block function setup (loop, locals) outweighed the savings from reduced function calls. However, enabling global compiler optimizations (`-O3`, `-gnatn`) combined with `pragma Inline` provided a massive speedup (~3.4x) by optimizing the simple calls effectively.
 **Action:** Prefer compiler flags (`-O3`, `-gnatn`) and `pragma Inline` over manual batching for small data chunks.
+
+## 2024-05-25 - Redundant Zero-Initialization
+**Learning:** Initializing an Ada record with an aggregate assignment (e.g., `P := (..., Payload => (others => 0));`) fully clears all fields. Following this with a second manual zeroing of unused array slices is redundant and costly (approx 25% overhead in deserialization), as the initial assignment already guarantees the state.
+**Action:** Trust the initial aggregate assignment for zero-initialization and avoid subsequent redundant clearing loops.
