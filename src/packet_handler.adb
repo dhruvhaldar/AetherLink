@@ -51,11 +51,18 @@ package body Packet_Handler with SPARK_Mode is
       Received_CRC   : Unsigned_16;
    begin
       --  Secure default initialization
-      P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
+      --  We explicitly initialize scalar fields but skip Payload initialization
+      --  to avoid double-writing. We MUST ensure Payload is zeroed on all paths.
+      P.ID := 0;
+      P.Sequence := 0;
+      P.Length := 0;
+      P.Checksum := 0;
+
       Status := Buffer_Underflow;
       
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
+         P.Payload := (others => 0); -- Fail Secure
          Status := Buffer_Underflow;
          return;
       end if;
@@ -80,19 +87,29 @@ package body Packet_Handler with SPARK_Mode is
       --  We need P.Length bytes for payload + 2 bytes for checksum.
       --  We use subtraction to avoid overflow when Buffer is at the end of memory.
       if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
+         P.Payload := (others => 0); -- Fail Secure
          Status := Payload_Length_Error;
          return;
       end if;
       
       declare
          Len : constant Natural := Natural (P.Length);
+
+         --  Helper to enable efficient slice assignment (memcpy) via view conversion
+         procedure Copy_Bytes (Dest : out Byte_Array; Src : in Byte_Array) with Inline is
+         begin
+            Dest := Src;
+         end Copy_Bytes;
       begin
          if Len > 0 then
-            for I in 1 .. Len loop
-               P.Payload (I) := Buffer (Index + I - 1);
-            end loop;
+            Copy_Bytes (Byte_Array (P.Payload (1 .. Len)), Buffer (Index .. Index + Len - 1));
             Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer (Index .. Index + Len - 1));
             Index := Index + Len;
+         end if;
+
+         --  Zero-initialize the unused portion of the payload
+         if Len < P.Payload'Length then
+            P.Payload (Len + 1 .. P.Payload'Last) := (others => 0);
          end if;
       end;
 

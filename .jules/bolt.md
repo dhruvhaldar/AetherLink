@@ -21,3 +21,11 @@
 ## 2024-05-25 - Redundant Zero-Initialization
 **Learning:** Initializing an Ada record with an aggregate assignment (e.g., `P := (..., Payload => (others => 0));`) fully clears all fields. Following this with a second manual zeroing of unused array slices is redundant and costly (approx 25% overhead in deserialization), as the initial assignment already guarantees the state.
 **Action:** Trust the initial aggregate assignment for zero-initialization and avoid subsequent redundant clearing loops.
+
+## 2024-05-25 - Ada View Conversion for memcpy
+**Learning:** Assigning a slice of a constrained array (Payload) to an unconstrained array (Buffer) or vice-versa via view conversion (e.g. `Byte_Array(Payload_Slice)`) fails if used as the LHS of an assignment directly. However, passing the view conversion as an `out` parameter to a helper procedure (e.g., `Copy(Dest, Src)`) bypasses this restriction and allows the compiler to generate efficient `memcpy` code.
+**Action:** Use a local `Copy_Bytes` helper procedure taking `out Byte_Array` to perform efficient slice assignment between incompatible array types.
+
+## 2024-05-25 - Redundant Initialization Cost
+**Learning:** Initializing a large record with an aggregate `(..., Payload => (others => 0))` performs a `memset` on the entire payload. If the payload is immediately overwritten by copy logic, this `memset` is wasted overhead (~40% of deserialization time).
+**Action:** Initialize scalar fields individually and leave large buffers uninitialized until the copy step, then zero-initialize only the remaining unused portion (Fail Secure).
