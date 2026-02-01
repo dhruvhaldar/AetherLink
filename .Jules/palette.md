@@ -29,3 +29,7 @@
 ## 2024-10-31 - Zero-Dimming for Sparse Data
 **Learning:** In sparse hex dumps (common in packet structures), the visual weight of '00' is equal to meaningful data, making patterns hard to spot. Dimming '00' bytes dramatically improves scannability.
 **Action:** Use dimmed colors for zero values in hex dumps to highlight non-zero data.
+
+## 2024-11-01 - Semantic Syntax Highlighting for Binary Data
+**Learning:** Flat hex dumps require mental mapping of protocol specs to bytes. Applying semantic coloring (e.g., ID=Yellow, Length=Blue) to the hex bytes themselves transforms the dump from a raw view into an educational visualization, instantly revealing the packet structure.
+**Action:** When dumping structured binary data, use color to distinguish fields like Headers, Payloads, and Checksums.

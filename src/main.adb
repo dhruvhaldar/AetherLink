@@ -14,11 +14,14 @@ procedure Main is
 
    --  ANSI Color Codes
    C_Reset   : constant String := ASCII.ESC & "[0m";
-   C_Green   : constant String := ASCII.ESC & "[32m";
    C_Red     : constant String := ASCII.ESC & "[31m";
+   C_Green   : constant String := ASCII.ESC & "[32m";
+   C_Yellow  : constant String := ASCII.ESC & "[33m";
+   C_Blue    : constant String := ASCII.ESC & "[34m";
+   C_Magenta : constant String := ASCII.ESC & "[35m";
    C_Cyan    : constant String := ASCII.ESC & "[36m";
-   C_Bold    : constant String := ASCII.ESC & "[1m";
    C_Dim     : constant String := ASCII.ESC & "[90m";
+   C_Bold    : constant String := ASCII.ESC & "[1m";
 
    function To_Hex (B : Unsigned_8) return String is
       Hex_Digits : constant array (0 .. 15) of Character := "0123456789ABCDEF";
@@ -57,6 +60,7 @@ procedure Main is
       Offset         : Natural := 0;
       B              : Unsigned_8;
       C              : Character;
+      K              : Natural;
    begin
       Put_Line (C_Cyan & "ADDR | 00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F | ASCII" & C_Reset);
       while Offset < Length loop
@@ -66,10 +70,22 @@ procedure Main is
          for I in 1 .. Bytes_Per_Line loop
             if Offset + I <= Length then
                B := Data (Data'First + Offset + I - 1);
-               if B = 0 then
-                  Put (C_Dim & "00" & C_Reset & " ");
+               K := Offset + I - 1;
+
+               if K = 0 then
+                  Put (C_Yellow & To_Hex (B) & C_Reset & " ");
+               elsif K = 1 or K = 2 then
+                  Put (C_Magenta & To_Hex (B) & C_Reset & " ");
+               elsif K = 3 then
+                  Put (C_Blue & To_Hex (B) & C_Reset & " ");
+               elsif K >= Length - 2 and Length >= 6 then
+                  Put (C_Green & To_Hex (B) & C_Reset & " ");
                else
-                  Put (To_Hex (B) & " ");
+                  if B = 0 then
+                     Put (C_Dim & "00" & C_Reset & " ");
+                  else
+                     Put (To_Hex (B) & " ");
+                  end if;
                end if;
             else
                Put ("   "); -- Padding for incomplete lines
@@ -126,6 +142,12 @@ begin
    Serialize (Tx_Packet, Buffer, Last);
    
    Put_Line ("📡 Transmitting " & Trim (Natural'Image (Last), Left) & " bytes.");
+   Put_Line ("   Legend: " &
+      C_Yellow  & "[ID] " &
+      C_Magenta & "[SEQ] " &
+      C_Blue    & "[LEN] " &
+      C_Reset   & "[PAYLOAD] " &
+      C_Green   & "[CRC]" & C_Reset);
    Print_Hex_Dump (Buffer, Last);
    New_Line;
    
