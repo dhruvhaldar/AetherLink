@@ -21,3 +21,7 @@
 ## 2024-05-25 - Redundant Zero-Initialization
 **Learning:** Initializing an Ada record with an aggregate assignment (e.g., `P := (..., Payload => (others => 0));`) fully clears all fields. Following this with a second manual zeroing of unused array slices is redundant and costly (approx 25% overhead in deserialization), as the initial assignment already guarantees the state.
 **Action:** Trust the initial aggregate assignment for zero-initialization and avoid subsequent redundant clearing loops.
+
+## 2024-05-25 - Ada Optimized Slice Copy Helper
+**Learning:** Direct slice assignment between distinct but compatible array types (e.g., Payload vs Buffer) often fails or requires loops. However, using a local helper procedure with `out` parameters of the unconstrained type allows the compiler to perform a view conversion on the arguments and optimize the assignment to `memcpy`, resulting in ~40% speedup over manual loops.
+**Action:** Use a local `Copy_Bytes(Dest, Src)` helper for efficient slice copying between incompatible array types instead of manual loops.

@@ -49,6 +49,12 @@ package body Packet_Handler with SPARK_Mode is
       Computed_Len : Unsigned_8;
       Calculated_CRC : Unsigned_16 := CRC16.Init_Val;
       Received_CRC   : Unsigned_16;
+
+      --  Helper to enable efficient slice assignment between compatible but distinct types
+      procedure Copy_Bytes (Dest : out Byte_Array; Src : in Byte_Array) with Inline is
+      begin
+         Dest := Src;
+      end Copy_Bytes;
    begin
       --  Secure default initialization
       P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
@@ -88,9 +94,9 @@ package body Packet_Handler with SPARK_Mode is
          Len : constant Natural := Natural (P.Length);
       begin
          if Len > 0 then
-            for I in 1 .. Len loop
-               P.Payload (I) := Buffer (Index + I - 1);
-            end loop;
+            --  Optimization: Use helper for slice assignment (compiles to memcpy)
+            Copy_Bytes (Byte_Array (P.Payload (1 .. Len)), Buffer (Index .. Index + Len - 1));
+
             Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer (Index .. Index + Len - 1));
             Index := Index + Len;
          end if;
