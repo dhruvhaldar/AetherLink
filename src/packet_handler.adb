@@ -57,6 +57,8 @@ package body Packet_Handler with SPARK_Mode is
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
          Status := Buffer_Underflow;
+         --  Secure default initialization
+         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
          return;
       end if;
       
@@ -81,6 +83,8 @@ package body Packet_Handler with SPARK_Mode is
       --  We use subtraction to avoid overflow when Buffer is at the end of memory.
       if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
          Status := Payload_Length_Error;
+         --  Secure default initialization
+         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
          return;
       end if;
       
@@ -104,6 +108,8 @@ package body Packet_Handler with SPARK_Mode is
          Status := Success;
       else
          Status := Checksum_Error;
+         --  Secure default initialization
+         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
       end if;
    end Deserialize;
 
