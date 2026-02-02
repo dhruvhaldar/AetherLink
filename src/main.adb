@@ -139,21 +139,25 @@ begin
       Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
       Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
       
-      --  Convert Payload back to string for display (Sanitized)
-      declare
-         Msg : String (1 .. Natural(Rx_Packet.Length));
-         C   : Character;
-      begin
+      --  Display Payload (Sanitized with Visual Polish)
+      Put ("   Payload:  ");
+      if Rx_Packet.Length = 0 then
+         Put_Line (C_Dim & "(Empty)" & C_Reset);
+      else
          for I in 1 .. Rx_Packet.Length loop
-            C := Character'Val(Rx_Packet.Payload(Natural(I)));
-            if Character'Pos(C) >= 32 and then Character'Pos(C) <= 126 then
-               Msg(Natural(I)) := C;
-            else
-               Msg(Natural(I)) := '.';
-            end if;
+            declare
+               B : constant Unsigned_8 := Rx_Packet.Payload(Natural(I));
+               C : constant Character  := Character'Val(B);
+            begin
+               if B >= 32 and B <= 126 then
+                  Put (C);
+               else
+                  Put (C_Dim & "." & C_Reset);
+               end if;
+            end;
          end loop;
-         Put_Line ("   Payload:  " & Msg);
-      end;
+         New_Line;
+      end if;
       
       if Rx_Packet.ID = Tx_Packet.ID and then 
          Rx_Packet.Sequence = Tx_Packet.Sequence then
