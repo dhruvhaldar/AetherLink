@@ -28,10 +28,10 @@ procedure Main is
 
    function To_Hex (N : Natural) return String is
       Hex_Digits : constant array (0 .. 15) of Character := "0123456789ABCDEF";
-      Result     : String (1 .. 4);
+      Result     : String (1 .. 8);
       Val        : Natural := N;
    begin
-      for I in reverse 1 .. 4 loop
+      for I in reverse 1 .. 8 loop
          Result(I) := Hex_Digits(Val mod 16);
          Val := Val / 16;
       end loop;
@@ -58,7 +58,7 @@ procedure Main is
       B              : Unsigned_8;
       C              : Character;
    begin
-      Put_Line (C_Cyan & "ADDR | 00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F | ASCII" & C_Reset);
+      Put_Line (C_Cyan & "ADDRESS  | 00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F | ASCII" & C_Reset);
       while Offset < Length loop
          Put (C_Cyan & To_Hex(Offset) & " | " & C_Reset);
 

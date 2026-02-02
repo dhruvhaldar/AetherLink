@@ -32,3 +32,8 @@
 **Vulnerability:** `Packet_Handler.Serialize` unconditionally incremented its `Index` variable after writing the final byte. If the output buffer was located at the very end of the memory address space (`Positive'Last`), this increment caused a `Constraint_Error` (Integer Overflow).
 **Learning:** Sequential processing loops that maintain a "next available index" pointer must be careful not to increment that pointer past the type's upper bound after the final write, even if the pointer is never used again.
 **Prevention:** Avoid the final pointer increment in sequential write operations, or ensure the pointer type has a range larger than the buffer index type (if possible), or assign the `Last` index directly from the current position instead of `Next - 1`.
+
+## 2024-05-27 - [Log Integrity Truncation]
+**Vulnerability:** The hex dump utility used a fixed 4-digit hex format for offsets, causing ambiguous log output for large packets (> 64KB) where the offset would wrap around visually (e.g., 0x10000 displayed as 0000).
+**Learning:** Security auditing tools must handle the full range of data types they display. Truncating offsets or IDs can lead to confusion during incident response or analysis.
+**Prevention:** Ensure formatting functions support the full width of the underlying data type (e.g., 8 hex digits for 32-bit Natural offsets) to prevent ambiguity.
