@@ -15,6 +15,9 @@ procedure Main is
    --  ANSI Color Codes
    C_Reset   : constant String := ASCII.ESC & "[0m";
    C_Green   : constant String := ASCII.ESC & "[32m";
+   C_Yellow  : constant String := ASCII.ESC & "[33m";
+   C_Blue    : constant String := ASCII.ESC & "[34m";
+   C_Magenta : constant String := ASCII.ESC & "[35m";
    C_Red     : constant String := ASCII.ESC & "[31m";
    C_Cyan    : constant String := ASCII.ESC & "[36m";
    C_Bold    : constant String := ASCII.ESC & "[1m";
@@ -52,12 +55,34 @@ procedure Main is
       end case;
    end Get_Status_Message;
 
-   procedure Print_Hex_Dump (Data : Byte_Array; Length : Natural) is
+   procedure Print_Packet_Dump (Data : Byte_Array; Length : Natural) is
       Bytes_Per_Line : constant Natural := 16;
       Offset         : Natural := 0;
       B              : Unsigned_8;
       C              : Character;
+      Payload_Len    : Natural := 0;
+
+      function Get_Color (Idx : Natural) return String is
+      begin
+         if Idx = 1 then return C_Yellow; end if;
+         if Idx = 2 or Idx = 3 then return C_Magenta; end if;
+         if Idx = 4 then return C_Blue; end if;
+         if Idx >= 5 and Idx < 5 + Payload_Len then return C_Reset; end if;
+         if Idx >= 5 + Payload_Len then return C_Green; end if;
+         return C_Dim;
+      end Get_Color;
    begin
+      if Length >= 4 then
+         Payload_Len := Natural(Data(Data'First + 3));
+      end if;
+
+      Put_Line ("Legend: " &
+                C_Yellow & "[ID] " &
+                C_Magenta & "[SEQ] " &
+                C_Blue & "[LEN] " &
+                C_Reset & "[PAYLOAD] " &
+                C_Green & "[CRC]" & C_Reset);
+
       Put_Line (C_Cyan & "ADDRESS  | 00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F | ASCII" & C_Reset);
       while Offset < Length loop
          Put (C_Cyan & To_Hex(Offset) & " | " & C_Reset);
@@ -66,10 +91,10 @@ procedure Main is
          for I in 1 .. Bytes_Per_Line loop
             if Offset + I <= Length then
                B := Data (Data'First + Offset + I - 1);
-               if B = 0 then
+               if B = 0 and (Offset + I >= 5 and Offset + I < 5 + Payload_Len) then
                   Put (C_Dim & "00" & C_Reset & " ");
                else
-                  Put (To_Hex (B) & " ");
+                  Put (Get_Color(Offset + I) & To_Hex (B) & C_Reset & " ");
                end if;
             else
                Put ("   "); -- Padding for incomplete lines
@@ -87,7 +112,7 @@ procedure Main is
                B := Data (Data'First + Offset + I - 1);
                if B >= 32 and B <= 126 then
                   C := Character'Val (B);
-                  Put (C);
+                  Put (Get_Color(Offset + I) & C & C_Reset);
                else
                   Put (C_Dim & "." & C_Reset);
                end if;
@@ -97,7 +122,7 @@ procedure Main is
          New_Line;
          Offset := Offset + Bytes_Per_Line;
       end loop;
-   end Print_Hex_Dump;
+   end Print_Packet_Dump;
 
 begin
    New_Line;
@@ -126,7 +151,7 @@ begin
    Serialize (Tx_Packet, Buffer, Last);
    
    Put_Line ("📡 Transmitting " & Trim (Natural'Image (Last), Left) & " bytes.");
-   Print_Hex_Dump (Buffer, Last);
+   Print_Packet_Dump (Buffer, Last);
    New_Line;
    
    --  Simulate Transmission (Loopback)
