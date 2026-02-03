@@ -21,3 +21,7 @@
 ## 2024-05-25 - Redundant Zero-Initialization
 **Learning:** Initializing an Ada record with an aggregate assignment (e.g., `P := (..., Payload => (others => 0));`) fully clears all fields. Following this with a second manual zeroing of unused array slices is redundant and costly (approx 25% overhead in deserialization), as the initial assignment already guarantees the state.
 **Action:** Trust the initial aggregate assignment for zero-initialization and avoid subsequent redundant clearing loops.
+
+## 2024-05-25 - Avoid Redundant Payload Zeroing
+**Learning:** Initializing a large record with an aggregate (e.g., `(..., Payload => (others => 0))`) followed by overwriting the payload with data results in double-writing memory. For high-throughput paths, it is more efficient to initialize scalar fields individually, copy the data, and then zero *only* the remaining unused payload bytes.
+**Action:** For large buffers, replace full zero-initialization with partial zeroing of unused space, ensuring strict "Fail Secure" reset on error paths.
