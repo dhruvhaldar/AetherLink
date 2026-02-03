@@ -29,3 +29,7 @@
 ## 2024-10-31 - Zero-Dimming for Sparse Data
 **Learning:** In sparse hex dumps (common in packet structures), the visual weight of '00' is equal to meaningful data, making patterns hard to spot. Dimming '00' bytes dramatically improves scannability.
 **Action:** Use dimmed colors for zero values in hex dumps to highlight non-zero data.
+
+## 2024-11-01 - Explicit Empty States
+**Learning:** An empty string output is ambiguous (Is it a bug? Is it null? Is it empty?). Explicitly stating "(Empty)" in a dimmed color removes ambiguity and reassures the user.
+**Action:** Always provide explicit feedback for empty states in data displays.
