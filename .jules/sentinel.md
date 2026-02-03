@@ -37,3 +37,8 @@
 **Vulnerability:** The hex dump utility used a fixed 4-digit hex format for offsets, causing ambiguous log output for large packets (> 64KB) where the offset would wrap around visually (e.g., 0x10000 displayed as 0000).
 **Learning:** Security auditing tools must handle the full range of data types they display. Truncating offsets or IDs can lead to confusion during incident response or analysis.
 **Prevention:** Ensure formatting functions support the full width of the underlying data type (e.g., 8 hex digits for 32-bit Natural offsets) to prevent ambiguity.
+
+## 2024-05-28 - Incomplete Fail-Secure Resets
+**Vulnerability:** `Packet_Handler.Deserialize` failed to reset the `out` parameter `P` upon `Payload_Length_Error` or `Checksum_Error`, despite documentation/intent to the contrary. This allowed partially parsed data to leak to the caller.
+**Learning:** Documentation or "intent" in memory is not code. Always verify that security-critical resets actually exist in the implementation, especially in error branches.
+**Prevention:** Add explicit regression tests that assert the state of `out` parameters after *failed* operations, not just successful ones.
