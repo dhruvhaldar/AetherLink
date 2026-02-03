@@ -118,8 +118,8 @@ begin
    Tx_Packet.Checksum := 12345; -- > 255 to test 16-bit serialization
 
    Put_Line ("📦 Generating Telemetry Packet...");
-   Put_Line ("   ID:       " & Packet_ID_Type'Image(Tx_Packet.ID));
-   Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Tx_Packet.Sequence));
+   Put_Line ("   ID:       " & Trim (Packet_ID_Type'Image(Tx_Packet.ID), Left));
+   Put_Line ("   Sequence: " & Trim (Sequence_Number_Type'Image(Tx_Packet.Sequence), Left));
    
    --  Serialize
    Put_Line ("⚙️  Serializing...");
@@ -136,8 +136,8 @@ begin
    
    if Status = Success then
       Put_Line (C_Green & "✅ Packet Received Successfully!" & C_Reset);
-      Put_Line ("   ID:       " & Packet_ID_Type'Image(Rx_Packet.ID));
-      Put_Line ("   Sequence: " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
+      Put_Line ("   ID:       " & Trim (Packet_ID_Type'Image(Rx_Packet.ID), Left));
+      Put_Line ("   Sequence: " & Trim (Sequence_Number_Type'Image(Rx_Packet.Sequence), Left));
       
       --  Display Payload (Sanitized with Visual Polish)
       Put ("   Payload:  ");
@@ -167,8 +167,8 @@ begin
          Put_Line (C_Green & "🔒 VERIFICATION PASSED: Data integrity confirmed." & C_Reset);
       else
          Put_Line (C_Red & "⚠️  VERIFICATION FAILED: Data mismatch." & C_Reset);
-         Put_Line ("   Expected Sequence:" & Sequence_Number_Type'Image(Tx_Packet.Sequence));
-         Put_Line ("   Got Sequence:     " & Sequence_Number_Type'Image(Rx_Packet.Sequence));
+         Put_Line ("   Expected Sequence:" & Trim (Sequence_Number_Type'Image(Tx_Packet.Sequence), Left));
+         Put_Line ("   Got Sequence:     " & Trim (Sequence_Number_Type'Image(Rx_Packet.Sequence), Left));
       end if;
    else
       Put_Line (C_Red & "❌ Packet Reception Failed: " & Get_Status_Message(Status) & C_Reset);
