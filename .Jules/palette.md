@@ -33,3 +33,7 @@
 ## 2024-11-01 - Explicit Empty States
 **Learning:** An empty string output is ambiguous (Is it a bug? Is it null? Is it empty?). Explicitly stating "(Empty)" in a dimmed color removes ambiguity and reassures the user.
 **Action:** Always provide explicit feedback for empty states in data displays.
+
+## 2024-11-02 - Context-Aware Hex Dumps
+**Learning:** Hex dumps are visually uniform, making it hard to distinguish protocol fields. Color-coding bytes by their structural role (ID, Seq, Len, Payload) creates an instant "visual map" of the packet, dramatically improving debuggability.
+**Action:** When printing structured binary data, apply distinct colors to headers, payloads, and footers, and provide a legend.
