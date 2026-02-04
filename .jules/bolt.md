@@ -25,3 +25,7 @@
 ## 2024-05-25 - Avoid Redundant Payload Zeroing
 **Learning:** Initializing a large record with an aggregate (e.g., `(..., Payload => (others => 0))`) followed by overwriting the payload with data results in double-writing memory. For high-throughput paths, it is more efficient to initialize scalar fields individually, copy the data, and then zero *only* the remaining unused payload bytes.
 **Action:** For large buffers, replace full zero-initialization with partial zeroing of unused space, ensuring strict "Fail Secure" reset on error paths.
+
+## 2024-05-25 - Avoid Reading Back Out Parameters
+**Learning:** Reading back from an `out` array parameter (e.g., `Buffer` in `Serialize`) to compute derived values like CRC significantly degrades performance (~13% overhead) compared to using the input source directly. The compiler may not optimize the store-load roundtrip as effectively as register operations on input locals.
+**Action:** Compute derived values from input data or local intermediates, ensuring `out` parameters are write-only whenever possible.
