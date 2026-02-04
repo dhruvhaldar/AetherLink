@@ -55,14 +55,25 @@ package body Packet_Handler with SPARK_Mode is
       begin
          Target := Source;
       end Copy_Bytes;
+
+      --  Helper to securely reset the packet (including payload)
+      procedure Reset_Packet with Inline is
+      begin
+         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
+      end Reset_Packet;
    begin
-      --  Secure default initialization
-      P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
+      --  Initialize only scalar fields to avoid redundant zeroing of payload
+      P.ID := 0;
+      P.Sequence := 0;
+      P.Length := 0;
+      P.Checksum := 0;
+
       Status := Buffer_Underflow;
       
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
          Status := Buffer_Underflow;
+         Reset_Packet;
          return;
       end if;
       
@@ -87,6 +98,7 @@ package body Packet_Handler with SPARK_Mode is
       --  We use subtraction to avoid overflow when Buffer is at the end of memory.
       if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
          Status := Payload_Length_Error;
+         Reset_Packet;
          return;
       end if;
       
@@ -100,6 +112,12 @@ package body Packet_Handler with SPARK_Mode is
             Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer (Index .. Index + Len - 1));
             Index := Index + Len;
          end if;
+
+         --  Zero the remaining unused payload bytes
+         --  This ensures no stale data leaks and is faster than pre-zeroing the entire array
+         if Len < Packet_Types.Payload_Index'Last then
+            P.Payload (Len + 1 .. Packet_Types.Payload_Index'Last) := (others => 0);
+         end if;
       end;
 
       --  Checksum Extraction
@@ -110,6 +128,7 @@ package body Packet_Handler with SPARK_Mode is
          Status := Success;
       else
          Status := Checksum_Error;
+         Reset_Packet;
       end if;
    end Deserialize;
 
