@@ -5,23 +5,29 @@ package body Packet_Handler with SPARK_Mode is
    procedure Serialize (P : in Packet; Buffer : out Byte_Array; Last : out Natural) is
       Index : Natural := Buffer'First;
       CRC   : Unsigned_16 := CRC16.Init_Val;
+      Val_16 : Unsigned_16;
+      Val_8  : Unsigned_8;
    begin
       --  Header: ID (1 byte)
       Buffer(Index) := P.ID;
-      CRC := CRC16.Update (CRC, Buffer (Index));
+      CRC := CRC16.Update (CRC, P.ID);
       Index := Index + 1;
       
       --  Header: Sequence (2 bytes, Big Endian)
-      Buffer(Index)     := Unsigned_8 (Shift_Right (P.Sequence, 8));
-      CRC := CRC16.Update (CRC, Buffer (Index));
+      Val_16 := P.Sequence;
 
-      Buffer(Index + 1) := Unsigned_8 (P.Sequence and 16#FF#);
-      CRC := CRC16.Update (CRC, Buffer (Index + 1));
+      Val_8 := Unsigned_8 (Shift_Right (Val_16, 8));
+      Buffer(Index) := Val_8;
+      CRC := CRC16.Update (CRC, Val_8);
+
+      Val_8 := Unsigned_8 (Val_16 and 16#FF#);
+      Buffer(Index + 1) := Val_8;
+      CRC := CRC16.Update (CRC, Val_8);
       Index := Index + 2;
       
       --  Header: Length (1 byte)
       Buffer(Index) := P.Length;
-      CRC := CRC16.Update (CRC, Buffer (Index));
+      CRC := CRC16.Update (CRC, P.Length);
       Index := Index + 1;
       
       --  Payload
@@ -30,7 +36,8 @@ package body Packet_Handler with SPARK_Mode is
             Len : constant Natural := Natural (P.Length);
          begin
             Buffer (Index .. Index + Len - 1) := Byte_Array (P.Payload (1 .. Len));
-            CRC := CRC16.Update (CRC, Buffer (Index .. Index + Len - 1));
+            --  Use Payload directly to avoid reading back from the just-written Buffer
+            CRC := CRC16.Update (CRC, Byte_Array (P.Payload (1 .. Len)));
             Index := Index + Len;
          end;
       end if;
@@ -77,19 +84,32 @@ package body Packet_Handler with SPARK_Mode is
          return;
       end if;
       
-      P.ID := Buffer(Index);
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
+      declare
+         Val : constant Unsigned_8 := Buffer(Index);
+      begin
+         P.ID := Val;
+         Calculated_CRC := CRC16.Update (Calculated_CRC, Val);
+      end;
       Index := Index + 1;
       
       --  Sequence (Big Endian)
-      P.Sequence := Shift_Left(Unsigned_16(Buffer(Index)), 8) + Unsigned_16(Buffer(Index+1));
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index + 1));
+      declare
+         B1 : constant Unsigned_8 := Buffer(Index);
+         B2 : constant Unsigned_8 := Buffer(Index + 1);
+      begin
+         P.Sequence := Shift_Left(Unsigned_16(B1), 8) + Unsigned_16(B2);
+         Calculated_CRC := CRC16.Update (Calculated_CRC, B1);
+         Calculated_CRC := CRC16.Update (Calculated_CRC, B2);
+      end;
       Index := Index + 2;
       
-      Computed_Len := Buffer(Index);
-      P.Length := Computed_Len;
-      Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer(Index));
+      declare
+         Val : constant Unsigned_8 := Buffer(Index);
+      begin
+         Computed_Len := Val;
+         P.Length := Computed_Len;
+         Calculated_CRC := CRC16.Update (Calculated_CRC, Val);
+      end;
       Index := Index + 1;
       
       --  Check if buffer has enough data for payload + checksum
@@ -109,7 +129,8 @@ package body Packet_Handler with SPARK_Mode is
             --  Use slice assignment via helper for performance (approx 2x faster than loop)
             Copy_Bytes (Buffer (Index .. Index + Len - 1), Byte_Array (P.Payload (1 .. Len)));
 
-            Calculated_CRC := CRC16.Update (Calculated_CRC, Buffer (Index .. Index + Len - 1));
+            --  Use Payload directly (hot in L1) to avoid re-reading Buffer
+            Calculated_CRC := CRC16.Update (Calculated_CRC, Byte_Array (P.Payload (1 .. Len)));
             Index := Index + Len;
          end if;
 
