@@ -37,3 +37,7 @@
 ## 2024-11-02 - Context-Aware Hex Dumps
 **Learning:** Hex dumps are visually uniform, making it hard to distinguish protocol fields. Color-coding bytes by their structural role (ID, Seq, Len, Payload) creates an instant "visual map" of the packet, dramatically improving debuggability.
 **Action:** When printing structured binary data, apply distinct colors to headers, payloads, and footers, and provide a legend.
+
+## 2024-11-03 - Humanizing Performance Data
+**Learning:** Raw execution times (e.g., "0.2814 s") are abstract and hard to contextualize. Converting them to "Operations Per Second" and using clear formatting (fixed precision, emojis) transforms dry stats into tangible performance metrics.
+**Action:** Always derive and display high-level throughput metrics (like ops/sec) alongside raw timing data in benchmarks.
