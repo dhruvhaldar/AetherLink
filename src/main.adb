@@ -4,6 +4,7 @@ with Ada.Strings.Fixed; use Ada.Strings.Fixed;
 with Packet_Types; use Packet_Types;
 with Packet_Handler; use Packet_Handler;
 with Interfaces; use Interfaces;
+with Sanitization; use Sanitization;
 
 procedure Main is
    Tx_Packet : Packet;
@@ -110,7 +111,7 @@ procedure Main is
          for I in 1 .. Bytes_Per_Line loop
             if Offset + I <= Length then
                B := Data (Data'First + Offset + I - 1);
-               if B >= 32 and B <= 126 then
+               if Is_Safe (B) then
                   C := Character'Val (B);
                   Put (Get_Color(Offset + I) & C & C_Reset);
                else
@@ -174,7 +175,7 @@ begin
                B : constant Unsigned_8 := Rx_Packet.Payload(Natural(I));
                C : constant Character  := Character'Val(B);
             begin
-               if B >= 32 and B <= 126 then
+               if Is_Safe (B) then
                   Put (C);
                else
                   Put (C_Dim & "." & C_Reset);
