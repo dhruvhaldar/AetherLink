@@ -60,22 +60,34 @@ package body CRC16 with SPARK_Mode is
       end Step;
 
    begin
-      --  4x Loop Unrolling for performance
-      --  We use a local inlined Step procedure to avoid function call overhead
-      --  of the external Update function, while keeping the unrolled loop clean.
-      while Index <= Data'Last - 3 loop
-         Step (Data (Index));
-         Step (Data (Index + 1));
-         Step (Data (Index + 2));
-         Step (Data (Index + 3));
+      --  Fast path: If the array is safely within integer bounds, skip overflow checks
+      if Data'Last < Integer'Last - 8 then
 
-         --  Check for overflow before incrementing near Integer'Last
-         if Index > Integer'Last - 4 then
-            return Local_Crc;
-         end if;
+         --  4x Loop Unrolling (No internal checks)
+         while Index <= Data'Last - 3 loop
+            Step (Data (Index));
+            Step (Data (Index + 1));
+            Step (Data (Index + 2));
+            Step (Data (Index + 3));
+            Index := Index + 4;
+         end loop;
 
-         Index := Index + 4;
-      end loop;
+      else
+         --  Safe fallback for buffers near Integer'Last
+         while Index <= Data'Last - 3 loop
+            Step (Data (Index));
+            Step (Data (Index + 1));
+            Step (Data (Index + 2));
+            Step (Data (Index + 3));
+
+            --  Check for overflow before incrementing near Integer'Last
+            if Index > Integer'Last - 4 then
+               return Local_Crc;
+            end if;
+
+            Index := Index + 4;
+         end loop;
+      end if;
 
       --  Handle remaining bytes
       while Index <= Data'Last loop
