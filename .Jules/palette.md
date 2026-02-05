@@ -41,3 +41,7 @@
 ## 2024-11-03 - Humanizing Performance Data
 **Learning:** Raw execution times (e.g., "0.2814 s") are abstract and hard to contextualize. Converting them to "Operations Per Second" and using clear formatting (fixed precision, emojis) transforms dry stats into tangible performance metrics.
 **Action:** Always derive and display high-level throughput metrics (like ops/sec) alongside raw timing data in benchmarks.
+
+## 2024-11-04 - Semantic Consistency in CLI Output
+**Learning:** When displaying summarized data (like text logs) alongside raw data (like hex dumps), reusing the same color scheme for fields creates a cohesive mental model, reinforcing the user's understanding of the data structure.
+**Action:** Mirror the color coding of visualization tools (hex dumps) in text summaries to create a unified visual language.
