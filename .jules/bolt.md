@@ -29,3 +29,7 @@
 ## 2024-05-25 - Avoid Reading Back Out Parameters
 **Learning:** Reading back from an `out` array parameter (e.g., `Buffer` in `Serialize`) to compute derived values like CRC significantly degrades performance (~13% overhead) compared to using the input source directly. The compiler may not optimize the store-load roundtrip as effectively as register operations on input locals.
 **Action:** Compute derived values from input data or local intermediates, ensuring `out` parameters are write-only whenever possible.
+
+## 2024-05-25 - Loop Unrolling Limits
+**Learning:** Increasing loop unrolling from 4x to 8x for CRC calculation degraded performance for small packets (due to overhead of the fallback loop logic) and provided no benefit for large packets (likely due to instruction cache or register pressure limits).
+**Action:** Stick to moderate unrolling (4x) and focus on removing control flow instructions (like overflow checks) from the hot loop using "Fast Path" guards.
