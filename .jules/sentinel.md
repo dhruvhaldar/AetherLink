@@ -37,3 +37,8 @@
 **Vulnerability:** The hex dump utility used a fixed 4-digit hex format for offsets, causing ambiguous log output for large packets (> 64KB) where the offset would wrap around visually (e.g., 0x10000 displayed as 0000).
 **Learning:** Security auditing tools must handle the full range of data types they display. Truncating offsets or IDs can lead to confusion during incident response or analysis.
 **Prevention:** Ensure formatting functions support the full width of the underlying data type (e.g., 8 hex digits for 32-bit Natural offsets) to prevent ambiguity.
+
+## 2024-05-28 - [Secure Object Cleanup]
+**Vulnerability:** Ada `out` parameters (like `Packet`) are not automatically zero-initialized. If a `Packet` containing sensitive payload data is reused or discarded without clearing, the data remains in memory (Data Remanence). Manual clearing via aggregate assignment is error-prone.
+**Learning:** High-assurance systems dealing with sensitive data (telemetry, keys) should provide explicit, verified mechanisms to wipe objects.
+**Prevention:** Implement and expose a public `Reset` procedure for data structures, verified with SPARK contracts (e.g., `Post => (for all I in P.Payload'Range => P.Payload(I) = 0)`), to ensure reliable sanitization.
