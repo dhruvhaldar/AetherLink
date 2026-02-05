@@ -1,5 +1,6 @@
 with Packet_Types; use Packet_Types;
 with CRC16;
+with Interfaces; use Interfaces;
 
 package Packet_Handler with SPARK_Mode is
 
@@ -15,5 +16,14 @@ package Packet_Handler with SPARK_Mode is
 
    --  Deserialize: Converts a Byte_Array to a Packet
    procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Status : out Packet_Status);
+
+   --  Reset: Securely clears the packet (including payload) to zero.
+   --  This ensures no sensitive data remains in the record.
+   procedure Reset (P : out Packet)
+     with Post => P.ID = 0
+              and P.Sequence = 0
+              and P.Length = 0
+              and P.Checksum = 0
+              and (for all I in P.Payload'Range => P.Payload(I) = 0);
 
 end Packet_Handler;

@@ -1,5 +1,3 @@
-with Interfaces; use Interfaces;
-
 package body Packet_Handler with SPARK_Mode is
 
    procedure Serialize (P : in Packet; Buffer : out Byte_Array; Last : out Natural) is
@@ -51,6 +49,12 @@ package body Packet_Handler with SPARK_Mode is
       Last := Index; -- Last points to the last written index
    end Serialize;
 
+   --  Reset: Securely clears the packet (including payload) to zero.
+   procedure Reset (P : out Packet) is
+   begin
+      P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
+   end Reset;
+
    procedure Deserialize (Buffer : in Byte_Array; P : out Packet; Status : out Packet_Status) is
       Index : Natural := Buffer'First;
       Computed_Len : Unsigned_8;
@@ -63,11 +67,6 @@ package body Packet_Handler with SPARK_Mode is
          Target := Source;
       end Copy_Bytes;
 
-      --  Helper to securely reset the packet (including payload)
-      procedure Reset_Packet with Inline is
-      begin
-         P := (ID => 0, Sequence => 0, Length => 0, Checksum => 0, Payload => (others => 0));
-      end Reset_Packet;
    begin
       --  Initialize only scalar fields to avoid redundant zeroing of payload
       P.ID := 0;
@@ -80,7 +79,7 @@ package body Packet_Handler with SPARK_Mode is
       --  Basic bounds check: ID(1) + Seq(2) + Len(1) + Checksum(2) = 6 bytes minimum (empty payload)
       if Buffer'Length < 6 then
          Status := Buffer_Underflow;
-         Reset_Packet;
+         Reset (P);
          return;
       end if;
       
@@ -118,7 +117,7 @@ package body Packet_Handler with SPARK_Mode is
       --  We use subtraction to avoid overflow when Buffer is at the end of memory.
       if Natural(P.Length) + 2 > (Buffer'Last - Index) + 1 then
          Status := Payload_Length_Error;
-         Reset_Packet;
+         Reset (P);
          return;
       end if;
       
@@ -149,7 +148,7 @@ package body Packet_Handler with SPARK_Mode is
          Status := Success;
       else
          Status := Checksum_Error;
-         Reset_Packet;
+         Reset (P);
       end if;
    end Deserialize;
 
