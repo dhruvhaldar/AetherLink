@@ -144,8 +144,9 @@ begin
    Tx_Packet.Checksum := 12345; -- > 255 to test 16-bit serialization
 
    Put_Line ("📦 Generating Telemetry Packet...");
-   Put_Line ("   ID:       " & Trim (Packet_ID_Type'Image(Tx_Packet.ID), Left));
-   Put_Line ("   Sequence: " & Trim (Sequence_Number_Type'Image(Tx_Packet.Sequence), Left));
+   Put_Line ("   " & C_Yellow & "ID:       " & C_Reset & Trim (Packet_ID_Type'Image(Tx_Packet.ID), Left));
+   Put_Line ("   " & C_Magenta & "Sequence: " & C_Reset & Trim (Sequence_Number_Type'Image(Tx_Packet.Sequence), Left));
+   Put_Line ("   " & C_Blue    & "Length:   " & C_Reset & Trim (Payload_Length_Type'Image(Tx_Packet.Length), Left));
    
    --  Serialize
    Put_Line ("⚙️  Serializing...");
@@ -162,8 +163,9 @@ begin
    
    if Status = Success then
       Put_Line (C_Green & "✅ Packet Received Successfully!" & C_Reset);
-      Put_Line ("   ID:       " & Trim (Packet_ID_Type'Image(Rx_Packet.ID), Left));
-      Put_Line ("   Sequence: " & Trim (Sequence_Number_Type'Image(Rx_Packet.Sequence), Left));
+      Put_Line ("   " & C_Yellow & "ID:       " & C_Reset & Trim (Packet_ID_Type'Image(Rx_Packet.ID), Left));
+      Put_Line ("   " & C_Magenta & "Sequence: " & C_Reset & Trim (Sequence_Number_Type'Image(Rx_Packet.Sequence), Left));
+      Put_Line ("   " & C_Blue    & "Length:   " & C_Reset & Trim (Payload_Length_Type'Image(Rx_Packet.Length), Left));
       
       --  Display Payload (Sanitized with Visual Polish)
       Put ("   Payload:  ");
